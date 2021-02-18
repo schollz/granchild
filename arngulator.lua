@@ -4,11 +4,12 @@ engine.name = "ZGlut"
 
 local mod_parameters = {"speed","pos","jitter","size","spread"}
 local mod_vals = {}
+local num_voices = 4
 
 local function setup_params()
   params:add_separator("samples")
   
-  for i=1,4 do
+  for i=1,num_voices do
 	params:add_group("sample "..i, 15)
     params:add_file(i .. "sample", i .. " sample")
     params:set_action(i .. "sample", function(file) engine.read(i, file) end)
@@ -100,19 +101,14 @@ end
 
 function loop()
 	-- update lfo for all active voices and all parameters
-	for i=1,4 do
-		if params:get(i.."play") == 2 then 
-			-- calculate for voice that is on
-
-		end
-	end
+	update_lfos()
 end
 
 
 -- lfo stuff
 
 local function setup_lfos()
-	for i=1,4 do
+	for i=1,num_voices do
 		mod_vals[i] = {}
 		for j,mod in ipairs(mod_parameters) do
 			local minmax = params:get(i..mod).get_range()
@@ -124,10 +120,12 @@ local function setup_lfos()
 	end
 end
 
-local function calculate_lfos()
-	for i,_ in ipairs(mod_vals) do
-		for j,m in ipairs(mod_vals[i]) do
-			params:set(m.name,util.clamp(util.linlin(-1,1,m.range[1],m.range[2],calculate_lfo(m.period,m.offset)),m.minmax[1],m.minmax[2]))
+local function update_lfos()
+	for i=1,num_voices do
+		if params:get(i.."play") == 2 then
+			for j,m in ipairs(mod_vals[i]) do
+				params:set(m.name,util.clamp(util.linlin(-1,1,m.range[1],m.range[2],calculate_lfo(m.period,m.offset)),m.minmax[1],m.minmax[2]))
+			end
 		end
 	end
 end
