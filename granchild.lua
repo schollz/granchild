@@ -2,10 +2,6 @@
 
 engine.name = "ZGlut"
 
-local mod_parameters = {"speed","pos","jitter","size","spread"}
-local mod_vals = {}
-local num_voices = 4
-
 local function setup_params()
   params:add_separator("samples")
   
@@ -92,48 +88,7 @@ local function setup_params()
 end
 
 function init() 
-	-- TODO initialize LFO parameters for each parameter on each voice
-
 	setup_params()
-	setup_lfos()
-	-- TODO constant loop for refreshing grid
-end
-
-local function loop()
-	-- update lfo for all active voices and all parameters
-	update_lfos()
-end
-
-
--- lfo stuff
-
-local function setup_lfos()
-	for i=1,num_voices do
-		mod_vals[i] = {}
-		for j,mod in ipairs(mod_parameters) do
-			local minmax = params:get(i..mod).get_range()
-			local range = minmax
-			local center_val = (range[2]-range[1])/2
-			range = {range[1]+(center_val-range[1])*math.random(0,100)/100,range[2]-(range[2]-center_val)*math.random(0,100)/100}
-			mod_vals[i][j] = {name=j..mod,minmax=minmax,range=range,period=math.random(1,64),offset=math.random()*30}
-		end
-	end
-end
-
-local function update_lfos()
-	for i=1,num_voices do
-		if params:get(i.."play") == 2 then
-			for j,m in ipairs(mod_vals[i]) do
-				params:set(m.name,util.clamp(util.linlin(-1,1,m.range[1],m.range[2],calculate_lfo(m.period,m.offset)),m.minmax[1],m.minmax[2]))
-			end
-		end
-	end
-end
-
-local function calculate_lfo(period_in_beats,offset)
-  if period_in_beats==0 then
-    return 1
-  else
-    return math.sin(2*math.pi*clock.get_beats()/period_in_beats+offset)
-  end
+	-- TODO setup grid
+	-- TODO setup toggler
 end
