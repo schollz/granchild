@@ -99,7 +99,7 @@ function init()
 	-- TODO constant loop for refreshing grid
 end
 
-function loop()
+local function loop()
 	-- update lfo for all active voices and all parameters
 	update_lfos()
 end
@@ -114,7 +114,7 @@ local function setup_lfos()
 			local minmax = params:get(i..mod).get_range()
 			local range = minmax
 			local center_val = (range[2]-range[1])/2
-			range = {range[1]+(center_val-range[1])*math.random(1,100)/100,center_val+(center_val-range[2])*math.random(1,100)/100}
+			range = {range[1]+(center_val-range[1])*math.random(0,100)/100,range[2]-(range[2]-center_val)*math.random(0,100)/100}
 			mod_vals[i][j] = {name=j..mod,minmax=minmax,range=range,period=math.random(1,64),offset=math.random()*30}
 		end
 	end
