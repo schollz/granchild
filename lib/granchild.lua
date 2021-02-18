@@ -42,15 +42,6 @@ function Granchild:new(args)
   -- keep track of pressed buttons
   m.pressed_buttons={}
 
-  -- grid refreshing
-  m.grid_refresh=metro.init()
-  m.grid_refresh.time=0.05
-  m.grid_refresh.event=function()
-    if m.g.cols>0 and m.grid_on then
-      m:grid_redraw()
-    end
-  end
-  m.grid_refresh:start()
 
   -- setup step sequencer
   m.recording_voice=0 -- set to current recording track
@@ -70,6 +61,21 @@ function Granchild:new(args)
       m.mod_vals[i][j]={name=j..mod,minmax=minmax,range=range,period=math.random(1,64),offset=math.random()*30}
     end
   end
+
+  -- setup lattice
+  -- TODO
+  
+  -- grid refreshing
+  m.grid_refresh=metro.init()
+  m.grid_refresh.time=0.05
+  m.grid_refresh.event=function()
+	 m:update_lfos() -- use this metro to update lfos too
+    if m.g.cols>0 and m.grid_on then
+      m:grid_redraw()
+    end
+  end
+  m.grid_refresh:start()
+  
   return m
 end
 
