@@ -1,3 +1,5 @@
+local lattice=include("kolor/lib/lattice")
+
 local Granchild={}
 
 
@@ -63,8 +65,25 @@ function Granchild:new(args)
   end
 
   -- setup lattice
-  -- TODO
-  
+  -- lattice
+  -- for keeping time of all the divisions
+  m.divisions={1,2,3,4,6,8,12,16}
+  m.lattice=lattice:new({
+    ppqn=8
+  })
+  m.timers={}
+  for i,division in ipairs(m.divisions) do
+    m.timers[i]={tt_beat=0}
+    m.timers[i].lattice=m.lattice:new_pattern{
+      action=function(t)
+        m:emit_note(i)
+      end,
+      division=1/division
+    }
+  end
+  m.lattice:start()
+
+
   -- grid refreshing
   m.grid_refresh=metro.init()
   m.grid_refresh.time=0.05
@@ -77,6 +96,10 @@ function Granchild:new(args)
   m.grid_refresh:start()
   
   return m
+end
+
+function Granchild:emit_note(division_id)
+ -- TODO
 end
 
 function Granchild:record_sequence(voice)
