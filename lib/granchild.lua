@@ -193,6 +193,8 @@ function Granchild:get_visual()
     end
   end
 
+  -- show the volume bar
+ 
   return self.visual
 end
 
