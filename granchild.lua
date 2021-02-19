@@ -15,10 +15,10 @@ local function setup_params()
     params:add_option(i .. "play", "play", {"off","on"}, 1)
     params:set_action(i .. "play", function(x) engine.gate(i, x-1) end)
 
-    params:add_control(i .. "seek", "seek", controlspec.new(0, 1, "lin", 0.001, 0))
+    params:add_control(i .. "seek", "seek", controlspec.new(0, 1, "lin", 0.001, 0,"",1/1000))
     params:set_action(i .. "seek", function(value)  engine.seek(i, util.clamp(value+params:get(i.."pos"),0,1)) end)
 
-    params:add_taper(i .. "volume", i .. " volume", 0, 1.0, 0, 0, "vol")
+    params:add_control(i .. "volume", i .. " volume",  controlspec.new(0, 1.0, "lin", 0.1, 0.25, "vol",1/10))
     params:set_action(i .. "volume", function(value) engine.volume(i, value) end)
 
     params:add_control(i .. "density", i .. " density",  controlspec.new(1, 40, "exp", 1, 12, "/beat",1/40))
@@ -50,7 +50,7 @@ local function setup_params()
     params:add_taper(i .. "jitter", i .. " jitter", 0, 500, 0, 5, "ms")
     params:set_action(i .. "jitter", function(value) engine.jitter(i, value / 1000) end)
   
-    params:add_taper(i .. "size", i .. " size", controlspec.new(1, 15, "lin", 1, 5,"",1/15))
+    params:add_control(i .. "size", i .. " size", controlspec.new(1, 15, "lin", 1, 5,"",1/15))
     params:set_action(i .. "size", function(value) engine.size(i, value * clock.get_beat_sec()/10 ) end)
 
     params:add_taper(i .. "spread", i .. " spread", 0, 100, 0, 0, "%")
@@ -93,19 +93,21 @@ function init()
 	setup_params()
 
   granchild_grid = granchild:new({grid_on=true,toggleable=true})
-  local kolor = include("kolor/lib/kolor")
-  kolor_grid = kolor:new({grid_on=false,toggleable=true})
-  kolor_grid:toggle_grid(false)
-  granchild_grid:toggle_grid(true)
-  kolor_grid:set_toggle_callback(function()
-    granchild_grid:toggle_grid()
-  end)
-  granchild_grid:set_toggle_callback(function()
-    kolor_grid:toggle_grid()
-  end)
+  -- local kolor = include("kolor/lib/kolor")
+  -- kolor_grid = kolor:new({grid_on=false,toggleable=true})
+  -- kolor_grid:toggle_grid(false)
+  -- granchild_grid:toggle_grid(true)
+  -- kolor_grid:set_toggle_callback(function()
+  --   granchild_grid:toggle_grid()
+  -- end)
+  -- granchild_grid:set_toggle_callback(function()
+  --   kolor_grid:toggle_grid()
+  -- end)
+
+
 	-- setup grid
-  kolor_grid.lattice.hard_sync()
-  granchild_grid.lattice.hard_sync()
+  -- kolor_grid.lattice.hard_sync()
+  -- granchild_grid.lattice.hard_sync()
 
 
   params:set("1sample",_path.audio.."tape/0027.wav")

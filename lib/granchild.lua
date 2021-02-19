@@ -181,18 +181,18 @@ function Granchild:key_press(row,col,on)
     end
   end
 
-  if col%4==2 and row<8 and on then
-    -- change volume
-    self:change_volume(row,col)
-  elseif col%4 == 3 or col%4==0 and on then
+  if (col%4 == 2 or col%4 == 3 or col%4==0) and row < 8 and on then
     -- change position
     self:change_position(row,col)
-  elseif col%4 == 1 and (row ==3 or row == 4) and on then
-    self:change_size(row,col)
-  -- elseif col%4 == 1 and (row ==3 or row == 4) and on then
-  --   self:change_pitch_mod(row,col)
   elseif col%4 == 1 and (row == 1 or row == 2) and on then
     self:change_density_mod(row,col)
+  elseif col%4 == 1 and (row ==3 or row == 4) and on then
+    self:change_size(row,col)
+  elseif col%4 == 1 and (row ==7 or row == 8) and on then
+    -- change volume
+    self:change_volume(row,col)
+  -- elseif col%4 == 1 and (row ==3 or row == 4) and on then
+  --   self:change_pitch_mod(row,col)
   end
 end
 
@@ -210,31 +210,32 @@ function Granchild:change_size(row,col)
   print("change_size "..voice.." "..diff.." "..params:get(voice.."size"))
 end
 
-function Granchild:change_pitch_mod(row,col)
+function Granchild:change_volume(row,col)
   local voice =  math.floor((col-1)/4)+1
-  local diff = -1 * ((row-3)*2-1)
-  self.voices[voice].pitch_mod_i = self.voices[voice].pitch_mod_i + diff
-  self.voices[voice].pitch_mod_i = util.clamp(self.voices[voice].pitch_mod_i,1,#pitch_mods)
-  print(self.voices[voice].pitch_mod_i)
-  params:set(voice.."pitch",pitch_mods[self.voices[voice].pitch_mod_i])
-  print("change_pitch_mod "..voice.." "..diff.." "..params:get(voice.."pitch"))
+  local diff = -1 * ((row-7)*2-1)
+  params:delta(voice.."volume",diff)
+  print("change_volume "..voice.." "..diff.." "..params:get(voice.."volume"))
 end
 
+-- function Granchild:change_pitch_mod(row,col)
+--   local voice =  math.floor((col-1)/4)+1
+--   local diff = -1 * ((row-3)*2-1)
+--   self.voices[voice].pitch_mod_i = self.voices[voice].pitch_mod_i + diff
+--   self.voices[voice].pitch_mod_i = util.clamp(self.voices[voice].pitch_mod_i,1,#pitch_mods)
+--   print(self.voices[voice].pitch_mod_i)
+--   params:set(voice.."pitch",pitch_mods[self.voices[voice].pitch_mod_i])
+--   print("change_pitch_mod "..voice.." "..diff.." "..params:get(voice.."pitch"))
+-- end
+
 function Granchild:change_position(row,col)
-  local voice = math.floor((col-3)/4)+1
-  col = col - 4*(voice-1) - 2 -- col now between 1 and 2
-  local val = (row-1)*2+col
+  local voice = math.floor((col-2)/4)+1
+  col = col - 4*(voice-1) - 1 -- col now between 1 and 3
+  local val = (row-1)*3+col
   if self.voices[voice].is_recording then 
     table.insert(self.voices[voice].steps,val)
   end
   print("change_position "..voice..": "..val)
-  params:set(voice.."seek",util.linlin(1,16,0,1,val))
-end
-
-function Granchild:change_volume(row,col)
-  local voice = math.floor((col-2)/4+1)
-  print("change_volume "..voice.." "..col.." "..util.linlin(1,8,-60,20,8-row))
-  params:set(voice.."volume",util.linlin(1,7,0,1,8-row))
+  params:set(voice.."seek",util.linlin(1,21,0,1,val)+(math.random()-0.5)/100)
 end
 
 
@@ -263,34 +264,25 @@ function Granchild:get_visual()
     end
   end
 
-  -- show the volume bar
-  for i=1,self.num_voices do 
-    local min_row = 8-util.round(util.linlin(0,1,1,7,params:get(i.."volume")))
-    local col = 4*(i-1)+2
-    for row=min_row,7 do 
-      self.visual[row][col]=12
-    end
-  end
+  -- -- show stop button
+  -- for i=1,self.num_voices do 
+  --   local row=7
+  --   local col=4*(i-1)+1
+  --   self.visual[row][col] = 4
+  --   if self.voices[i].is_playing then 
+  --     self.visual[row][col] = 14
+  --   end
+  -- end
 
-  -- show stop button
-  for i=1,self.num_voices do 
-    local row=7
-    local col=4*(i-1)+1
-    self.visual[row][col] = 4
-    if self.voices[i].is_playing then 
-      self.visual[row][col] = 14
-    end
-  end
-
-  -- show rec button
-  for i=1,self.num_voices do 
-    local row=6
-    local col=4*(i-1)+1
-    self.visual[row][col] = 4
-    if self.voices[i].is_recording then 
-      self.visual[row][col] = 14
-    end
-  end
+  -- -- show rec button
+  -- for i=1,self.num_voices do 
+  --   local row=6
+  --   local col=4*(i-1)+1
+  --   self.visual[row][col] = 4
+  --   if self.voices[i].is_recording then 
+  --     self.visual[row][col] = 14
+  --   end
+  -- end
 
   -- show density modifiers
   for i=1,self.num_voices do 
@@ -306,6 +298,15 @@ function Granchild:get_visual()
     local val = util.linlin(1,15,0,15,params:get(i.."size"))
     local col=4*(i-1)+1
     for row=3,4 do
+      self.visual[row][col] = util.round(val)
+    end
+  end
+
+  -- show the volume 
+  for i=1,self.num_voices do 
+    local val = util.linlin(0,1,0,15,params:get(i.."volume"))
+    local col=4*(i-1)+1
+    for row=7,8 do
       self.visual[row][col] = util.round(val)
     end
   end
@@ -328,12 +329,9 @@ function Granchild:get_visual()
 
   -- show current position
   for i=1,self.num_voices do 
-    local pos = math.floor(util.round(util.linlin(0,1,1,16,params:get(i.."seek"))))
-    local row = math.floor((pos-1)/2)+1
-    local col = 3
-    if pos%2 == 0 then 
-      col = 4
-    end
+    local pos = math.floor(util.round(util.linlin(0,1,1,21,params:get(i.."seek"))))
+    local row = math.floor((pos-1)/3)+1
+    local col = pos - (row-1)*3 +1
     col = col + (i-1)*4
     self.visual[row][col] = 12
   end
