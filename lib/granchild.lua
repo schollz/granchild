@@ -112,6 +112,22 @@ function Granchild:new(args)
   end
   m.grid_refresh:start()
 
+  -- metro for checking if keys are held to toggle re-presses
+  m.key_held=metro.init()
+  m.key_held.time=0.1
+  m.key_held.event=function()
+    -- only on column 1, 5, 9, 13
+    local cols = {1,5,9,13}
+    for _, col in ipairs(cols) do
+      for row=1,8 do
+        if self.pressed_buttons[row..","..col] ~= nil then
+
+        end
+      end
+    end
+  end
+  m.key_held:start()
+
   return m
 end
 
@@ -164,7 +180,7 @@ end
 
 function Granchild:key_press(row,col,on)
   if on then
-    self.pressed_buttons[row..","..col]=true
+    self.pressed_buttons[row..","..col]=self:current_time()
     if row==8 and col==2 and self.toggleable then
       self.kill_timer=self:current_time()
     end
