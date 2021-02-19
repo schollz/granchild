@@ -4,6 +4,11 @@ engine.name="ZGlut"
 
 local granchild=include("granchild/lib/granchild")
 
+local position={1,1}
+local press_positions={{0,0},{0,0}}
+local norns_screen={}
+
+
 local function setup_params()
   params:add_separator("samples")
   local num_voices=4
@@ -109,9 +114,83 @@ function init()
   -- kolor_grid.lattice.hard_sync()
   -- granchild_grid.lattice.hard_sync()
 
+  clock.run(function()
+    while true do
+      clock.sleep(1/10) -- refresh
+      norns_screen=granchild_grid.visual
+      -- TODO: toggle between kolor and granchild
+      redraw()
+    end
+  end) -- start the grid redraw clock
 
   params:set("1sample",_path.audio.."tape/0027.wav")
   params:set("1play",2)
   params:set("2sample",_path.audio.."tape/0026.wav")
   params:set("2play",2)
 end
+
+
+
+function enc(k,d)
+  if k==2 then
+    position[1]=position[1]+d
+    if position[1]>8 then
+      position[1]=8
+    elseif position[1]<1 then
+      position[1]=1
+    end
+  elseif k==3 then
+    position[2]=position[2]+d
+    if position[2]>16 then
+      position[2]=16
+    elseif position[2]<1 then
+      position[2]=1
+    end
+  end
+end
+
+function key(k,z)
+  if k>1 then
+    if z==1 then
+      if util.file_exists("/home/we/dust/code/tmi") then
+        if k==3 then
+          --m:toggle_play()
+        end
+      end
+      press_positions[k-1]={position[1],position[2]}
+    end
+    d:key_press(press_positions[k-1][1],press_positions[k-1][2],z==1)
+  end
+end
+
+
+
+function redraw()
+  screen.clear()
+  screen.level(0)
+  screen.rect(1,1,128,64)
+  screen.fill()
+
+  local gd=norns_screen
+  rows=#gd
+  cols=#gd[1]
+  for row=1,rows do
+    for col=1,cols do
+      if gd[row][col]~=0 then
+        screen.level(gd[row][col])
+        screen.rect(col*8-7,row*8-8+1,6,6)
+        screen.fill()
+      end
+    end
+  end
+  screen.level(15)
+  screen.rect(position[2]*8-7,position[1]*8-8+1,7,7)
+  screen.stroke()
+
+  screen.update()
+end
+
+function rerun()
+  norns.script.load(norns.state.script)
+end
+ 
