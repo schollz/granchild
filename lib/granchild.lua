@@ -65,9 +65,11 @@ function Granchild:new(args)
   local mod_parameters={
     {name="speed",range={0,5},lfo={16,64}},
     {name="jitter",range={5,50},lfo={32,64}},
-    {name="size",range={75,500},lfo={16,32}},
+    -- {name="size",range={75,500},lfo={16,32}},
     {name="spread",range={0,100},lfo={16,24}},
   }
+  -- TODO
+  -- ADD SIZE OFFSET, tie it to where the octave keys are
   m.mod_vals={}
 
   for i=1,m.num_voices do
