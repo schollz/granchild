@@ -21,7 +21,10 @@ local function setup_params()
   for i=1,num_voices do
     params:add_group("sample "..i,15)
     params:add_file(i.."sample",i.." sample")
-    params:set_action(i.."sample",function(file) engine.read(i,file) end)
+    params:set_action(i.."sample",function(file) 
+	    engine.read(i,file) 
+	    params:set(i.."play",2)
+    end)
 
     params:add_option(i.."play","play",{"off","on"},1)
     params:set_action(i.."play",function(x) engine.gate(i,x-1) end)
