@@ -62,17 +62,22 @@ function Granchild:new(args)
   end
 
   -- setup lfos
-  local mod_parameters={"speed","pos","jitter","size","spread"}
+  local mod_parameters={
+    {name="speed",range={-2,2}},
+    {name="jitter",range={0,100}},
+    -- {name="size",range={clock.get_beat_sec()/10*1000, clock.get_beat_sec()*1000/4*3}},
+    {name="spread",range={0,100}},
+  }
   m.mod_vals={}
 
   for i=1,m.num_voices do
     m.mod_vals[i]={}
     for j,mod in ipairs(mod_parameters) do
-      local minmax=params:get(i..mod).get_range()
+      local minmax=mod.range
       local range=minmax
       local center_val=(range[2]-range[1])/2
       range={range[1]+(center_val-range[1])*math.random(0,100)/100,range[2]-(range[2]-center_val)*math.random(0,100)/100}
-      m.mod_vals[i][j]={name=j..mod,minmax=minmax,range=range,period=math.random(1,64),offset=math.random()*30}
+      m.mod_vals[i][j]={name=i..mod.name,minmax=minmax,range=range,period=math.random(1,64),offset=math.random()*30}
     end
   end
 
@@ -97,7 +102,7 @@ function Granchild:new(args)
 
   -- grid refreshing
   m.grid_refresh=metro.init()
-  m.grid_refresh.time=0.05
+  m.grid_refresh.time=0.1
   m.grid_refresh.event=function()
 	 m:update_lfos() -- use this metro to update lfos too
     if m.g.cols>0 and m.grid_on then
@@ -160,14 +165,12 @@ function Granchild:key_press(row,col,on)
   if on then
     self.pressed_buttons[row..","..col]=true
     if self.toggleable then
-      print("holding kill timer")
       self.kill_timer=self:current_time()
     end
   else
     self.pressed_buttons[row..","..col]=nil
     if self.toggleable then
       self.kill_timer=self:current_time()-self.kill_timer
-      print(self.kill_timer)
       if self.kill_timer>2 then
         self:toggle_grid(false)
       end
@@ -178,7 +181,7 @@ function Granchild:key_press(row,col,on)
   if col%4==2 and row<8 and on then
     -- change volume
     self:change_volume(row,col)
-  elseif col%4 > 2 and on then
+  elseif col%4 == 3 or col%4==0 and on then
     -- change position
     self:change_position(row,col)
   elseif col%4 == 1 and (row ==3 or row == 4) and on then
@@ -188,19 +191,24 @@ function Granchild:key_press(row,col,on)
   end
 end
 
-function self:change_pitch_mod(row,col)
-  local voice = math.floor((col-3)/4)+1
-  params:delta(voice.."density",(row-1)*3-2)
+function Granchild:change_density_mod(row,col)
+  local voice = math.floor((col-1)/4)+1
+  local diff = -1 * ((row-1)*2-1)
+  params:delta(voice.."density",diff)
+  print("change_density_mod "..voice.." "..diff.." "..params:get(voice.."density"))
 end
 
-function self:change_pitch_mod(row,col)
-  local voice = math.floor((col-3)/4)+1
-  self.voices[voice].pitch_mod_i = self.voices[voice].pitch_mod_i + (row-3)*3-2 
-  self.voices[voice].pitch_mod_i = util.clamp(1,#pitch_mods,self.voices[voice].pitch_mod_i)
+function Granchild:change_pitch_mod(row,col)
+  local voice =  math.floor((col-1)/4)+1
+  local diff = -1 * ((row-3)*2-1)
+  self.voices[voice].pitch_mod_i = self.voices[voice].pitch_mod_i + diff
+  self.voices[voice].pitch_mod_i = util.clamp(self.voices[voice].pitch_mod_i,1,#pitch_mods)
+  print(self.voices[voice].pitch_mod_i)
   params:set(voice.."pitch",pitch_mods[self.voices[voice].pitch_mod_i])
+  print("change_pitch_mod "..voice.." "..diff.." "..params:get(voice.."pitch"))
 end
 
-function self:change_position(row,col)
+function Granchild:change_position(row,col)
   local voice = math.floor((col-3)/4)+1
   col = col - 4*(voice-1) - 2 -- col now between 1 and 2
   local val = (row-1)*2+col
@@ -211,10 +219,10 @@ function self:change_position(row,col)
   params:set(voice.."seek",util.linlin(1,16,0,1,val))
 end
 
-function self:change_volume(row,col)
-  local voice = (col-2)/4+1
-  print("change_volume "..voice)
-  params:set(voice.."volume",util.linlin(7,1,-60,20,col))
+function Granchild:change_volume(row,col)
+  local voice = math.floor((col-2)/4+1)
+  print("change_volume "..voice.." "..col.." "..util.linlin(1,8,-60,20,8-row))
+  params:set(voice.."volume",util.linlin(1,7,0,1,8-row))
 end
 
 
@@ -236,9 +244,6 @@ function Granchild:get_visual()
       end
     end
   end
-  if self.show_graphic[2]>0 then
-    self.show_graphic[2]=self.show_graphic[2]-1
-  end
 
   -- clear visual
   for row=1,8 do
@@ -249,7 +254,7 @@ function Granchild:get_visual()
 
   -- show the volume bar
   for i=1,self.num_voices do 
-    local min_row = util.round(util.linlin(-60,20,7,1,params:get(i.."volume")))
+    local min_row = 8-util.round(util.linlin(0,1,1,7,params:get(i.."volume")))
     local col = 4*(i-1)+2
     for row=min_row,7 do 
       self.visual[row][col]=12
@@ -279,13 +284,15 @@ function Granchild:get_visual()
   -- show density modifiers
   for i=1,self.num_voices do 
     local val = util.linlin(1,40,0,15,params:get(i.."density"))
-    for row=3,4 do
-      self.visual[row][col] = val
+    local col=4*(i-1)+1
+    for row=1,2 do
+      self.visual[row][col] = util.round(val)
     end
   end
 
   -- show pitch modifiers
   for i=1,self.num_voices do 
+    local col=4*(i-1)+1
     local closet_mod = {4,10000}
     local current_pitch = params:get(i.."pitch")
     for j,p in ipairs(pitch_mods) do 
@@ -294,12 +301,28 @@ function Granchild:get_visual()
       end
     end
     local val = util.linlin(1,#pitch_mods,0,15,closet_mod[1])
-    for row=1,2 do
-      self.visual[row][col] = val
+    for row=3,4 do
+      self.visual[row][col] = util.round(val)
     end
   end
 
+  -- show current position
+  for i=1,self.num_voices do 
+    local pos = math.floor(util.round(util.linlin(0,1,1,16,params:get(i.."seek"))))
+    local row = math.floor((pos-1)/2)+1
+    local col = 3
+    if pos%2 == 0 then 
+      col = 4
+    end
+    col = col + (i-1)*4
+    self.visual[row][col] = 12
+  end
+
   return self.visual
+end
+
+function Granchild:current_time()
+  return clock.get_beat_sec()*clock.get_beats()
 end
 
 function Granchild:grid_redraw()
@@ -321,13 +344,13 @@ function Granchild:update_lfos()
   for i=1,self.num_voices do
     if params:get(i.."play")==2 then
       for j,m in ipairs(self.mod_vals[i]) do
-        params:set(m.name,util.clamp(util.linlin(-1,1,m.range[1],m.range[2],calculate_lfo(m.period,m.offset)),m.minmax[1],m.minmax[2]))
+        params:set(m.name,util.clamp(util.linlin(-1,1,m.range[1],m.range[2],self:calculate_lfo(m.period,m.offset)),m.minmax[1],m.minmax[2]))
       end
     end
   end
 end
 
-local function calculate_lfo(period_in_beats,offset)
+function Granchild:calculate_lfo(period_in_beats,offset)
   if period_in_beats==0 then
     return 1
   else

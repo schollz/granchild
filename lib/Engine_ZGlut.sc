@@ -88,7 +88,7 @@ Engine_ZGlut : CroneEngine {
 			level = env;
 
 			Out.ar(out, sig * level * gain);
-			Out.ar(effectBus, sig * level * send);
+			Out.ar(effectBus, sig * level * send * gain);
 			Out.kr(phase_out, pos_sig);
 			// ignore gain for level out
 			Out.kr(level_out, level);
@@ -241,17 +241,22 @@ Engine_ZGlut : CroneEngine {
 		voices[voice].set(\send, msg[2]);
 		});
 		
-		nvoices.do({ arg i;
-			this.addPoll(("phase_" ++ (i+1)).asSymbol, {
-				var val = phases[i].getSynchronous;
-				val
-			});
-
-			this.addPoll(("level_" ++ (i+1)).asSymbol, {
-				var val = levels[i].getSynchronous;
-				val
-			});
+		this.addCommand("volume", "if", { arg msg;
+			var voice = msg[1] - 1;
+			voices[voice].set(\gain, msg[2]);
 		});
+
+		// nvoices.do({ arg i;
+		// 	this.addPoll(("phase_" ++ (i+1)).asSymbol, {
+		// 		var val = phases[i].getSynchronous;
+		// 		val
+		// 	});
+
+		// 	this.addPoll(("level_" ++ (i+1)).asSymbol, {
+		// 		var val = levels[i].getSynchronous;
+		// 		val
+		// 	});
+		// });
 
 		seek_tasks = Array.fill(nvoices, { arg i;
 			Routine {}

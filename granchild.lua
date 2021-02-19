@@ -6,7 +6,7 @@ local granchild = include("granchild/lib/granchild")
 
 local function setup_params()
   params:add_separator("samples")
-  
+  local num_voices = 4
   for i=1,num_voices do
 	params:add_group("sample "..i, 15)
     params:add_file(i .. "sample", i .. " sample")
@@ -18,13 +18,13 @@ local function setup_params()
     params:add_control(i .. "seek", "seek", controlspec.new(0, 1, "lin", 0.001, 0))
     params:set_action(i .. "seek", function(value)  engine.seek(i, util.clamp(value+params:get(i.."pos"),0,1)) end)
 
-    params:add_taper(i .. "volume", i .. " volume", -60, 20, 0, 0, "dB")
-    params:set_action(i .. "volume", function(value) engine.volume(i, math.pow(10, value / 20)) end)
+    params:add_taper(i .. "volume", i .. " volume", 0, 1.0, 0, 0, "vol")
+    params:set_action(i .. "volume", function(value) engine.volume(i, value) end)
 
-    params:add_taper(i .. "density", i .. " density", 1, 40, 1, 1, "/beat")
+    params:add_control(i .. "density", i .. " density",  controlspec.new(1, 40, "exp", 1, 12, "/beat",1/40))
     params:set_action(i .. "density", function(value) engine.density(i, value/(4*clock.get_beat_sec())) end)
   
-    params:add_taper(i .. "pitch", i .. " pitch", -48, 48, 0, 0, "st")
+    params:add_control(i .. "pitch", i .. " pitch",  controlspec.new(-48, 48, "lin", 1, 0, "note",1/48))
     params:set_action(i .. "pitch", function(value) engine.pitch(i, math.pow(0.5, -value / 12)) end)
     
     params:add_taper(i .. "fade", i .. " att / dec", 1, 9000, 1000, 3, "ms")
@@ -108,4 +108,9 @@ function init()
   -- granchild_grid:lattice.hard_sync()
 
 	-- TODO setup toggler
+
+  -- params:set("1sample",_path.audio.."tape/0027.wav")
+  -- params:set("1play",2)
+  -- params:set("2sample",_path.audio.."tape/0026.wav")
+  -- params:set("2play",2)
 end
