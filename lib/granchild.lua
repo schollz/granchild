@@ -309,6 +309,15 @@ function Granchild:get_visual()
     end
   end
 
+  -- show speed modifiers
+  for i=1,self.num_voices do 
+    local val = util.linlin(-2,2,0,15,params:get(i.."speed"))
+    local col=4*(i-1)+1
+    for row=5,6 do
+      self.visual[row][col] = util.round(val)
+    end
+  end
+
   -- show the volume 
   for i=1,self.num_voices do 
     local val = util.linlin(0,1,0,15,params:get(i.."volume"))
