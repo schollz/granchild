@@ -55,7 +55,6 @@ Engine_ZGlut : CroneEngine {
 			var env;
 			var level;
 
-
 			density = Lag.kr(density);
 			spread = Lag.kr(spread);
 			size = Lag.kr(size);

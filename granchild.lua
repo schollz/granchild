@@ -109,8 +109,8 @@ function init()
 
 	-- TODO setup toggler
 
-  -- params:set("1sample",_path.audio.."tape/0027.wav")
-  -- params:set("1play",2)
-  -- params:set("2sample",_path.audio.."tape/0026.wav")
-  -- params:set("2play",2)
+  params:set("1sample",_path.audio.."tape/0027.wav")
+  params:set("1play",2)
+  params:set("2sample",_path.audio.."tape/0026.wav")
+  params:set("2play",2)
 end

@@ -63,10 +63,10 @@ function Granchild:new(args)
 
   -- setup lfos
   local mod_parameters={
-    {name="speed",range={-2,2}},
-    {name="jitter",range={0,100}},
-    -- {name="size",range={clock.get_beat_sec()/10*1000, clock.get_beat_sec()*1000/4*3}},
-    {name="spread",range={0,100}},
+    {name="speed",range={0,5},lfo={16,64}},
+    {name="jitter",range={5,50},lfo={32,64}},
+    {name="size",range={75,200},lfo={16,32}},
+    {name="spread",range={0,100},lfo={16,24}},
   }
   m.mod_vals={}
 
@@ -75,9 +75,9 @@ function Granchild:new(args)
     for j,mod in ipairs(mod_parameters) do
       local minmax=mod.range
       local range=minmax
-      local center_val=(range[2]-range[1])/2
-      range={range[1]+(center_val-range[1])*math.random(0,100)/100,range[2]-(range[2]-center_val)*math.random(0,100)/100}
-      m.mod_vals[i][j]={name=i..mod.name,minmax=minmax,range=range,period=math.random(1,64),offset=math.random()*30}
+      -- local center_val=(range[2]-range[1])/2
+      -- range={range[1]+(center_val-range[1])*math.random(0,100)/100,range[2]-(range[2]-center_val)*math.random(0,100)/100}
+      m.mod_vals[i][j]={name=i..mod.name,minmax=minmax,range=range,period=math.random(mod.lfo[1],mod.lfo[2]),offset=math.random()*30}
     end
   end
 
@@ -122,7 +122,7 @@ function Granchild:emit_note(division)
         self.voices[i].step = 1 
       end
       local step_val = self.voices[i].steps[self.voices[i].step]
-      params:set(i.."seek",util.linlin(1,16,0,1,step_val))
+      params:set(i.."seek",util.linlin(1,16,0,1,step_val)+(math.random()-0.5)/100)
     end
   end
 end
@@ -172,7 +172,8 @@ function Granchild:key_press(row,col,on)
     if self.toggleable then
       self.kill_timer=self:current_time()-self.kill_timer
       if self.kill_timer>2 then
-        self:toggle_grid(false)
+        print("killing!")
+        -- self:toggle_grid(false)
       end
       self.kill_timer=0
     end
