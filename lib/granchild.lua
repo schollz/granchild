@@ -4,6 +4,7 @@ local Granchild={}
 
 local pitch_mods={-12,-7,-5,0,5,7,12}
 
+
 function Granchild:new(args)
   local m=setmetatable({},{__index=Granchild})
   local args=args==nil and {} or args
@@ -295,36 +296,32 @@ function Granchild:get_visual()
   for i=1,self.num_voices do
     local val=util.linlin(1,40,0,15,params:get(i.."density"))
     local col=4*(i-1)+1
-    for row=1,2 do
-      self.visual[row][col]=util.round(val)
-    end
+    self.visual[1][col]=util.round(val)
+    self.visual[2][col]=15-util.round(val)
   end
 
   -- show size modifiers
   for i=1,self.num_voices do
     local val=util.linlin(1,15,0,15,params:get(i.."size"))
     local col=4*(i-1)+1
-    for row=3,4 do
-      self.visual[row][col]=util.round(val)
-    end
+    self.visual[3][col]=util.round(val)
+    self.visual[4][col]=15-util.round(val)
   end
 
   -- show speed modifiers
   for i=1,self.num_voices do
     local val=util.linlin(-2,2,0,15,params:get(i.."speed"))
     local col=4*(i-1)+1
-    for row=5,6 do
-      self.visual[row][col]=util.round(val)
-    end
+    self.visual[5][col]=util.round(val)
+    self.visual[6][col]=15-util.round(val)
   end
 
   -- show the volume
   for i=1,self.num_voices do
     local val=util.linlin(0,1,0,15,params:get(i.."volume"))
     local col=4*(i-1)+1
-    for row=7,8 do
-      self.visual[row][col]=util.round(val)
-    end
+    self.visual[7][col]=util.round(val)
+    self.visual[8][col]=15-util.round(val)
   end
 
   -- -- show pitch modifiers
