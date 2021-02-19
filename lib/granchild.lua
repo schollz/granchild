@@ -166,16 +166,16 @@ end
 function Granchild:key_press(row,col,on)
   if on then
     self.pressed_buttons[row..","..col]=true
-    if self.toggleable then
+    if row==8 and col==2 and self.toggleable then
       self.kill_timer=self:current_time()
     end
   else
     self.pressed_buttons[row..","..col]=nil
-    if self.toggleable then
+    if row==8 and col==2 and self.toggleable then
       self.kill_timer=self:current_time()-self.kill_timer
-      if self.kill_timer>2 then
-        print("killing!")
-        -- self:toggle_grid(false)
+      if self.kill_timer>1 then
+        print("switching!")
+        self:toggle_grid(false)
       end
       self.kill_timer=0
     end
@@ -188,7 +188,9 @@ function Granchild:key_press(row,col,on)
     -- change position
     self:change_position(row,col)
   elseif col%4 == 1 and (row ==3 or row == 4) and on then
-    self:change_pitch_mod(row,col)
+    self:change_size(row,col)
+  -- elseif col%4 == 1 and (row ==3 or row == 4) and on then
+  --   self:change_pitch_mod(row,col)
   elseif col%4 == 1 and (row == 1 or row == 2) and on then
     self:change_density_mod(row,col)
   end
@@ -199,6 +201,13 @@ function Granchild:change_density_mod(row,col)
   local diff = -1 * ((row-1)*2-1)
   params:delta(voice.."density",diff)
   print("change_density_mod "..voice.." "..diff.." "..params:get(voice.."density"))
+end
+
+function Granchild:change_size(row,col)
+  local voice =  math.floor((col-1)/4)+1
+  local diff = -1 * ((row-3)*2-1)
+  params:delta(voice.."size",diff)
+  print("change_size "..voice.." "..diff.." "..params:get(voice.."size"))
 end
 
 function Granchild:change_pitch_mod(row,col)
@@ -227,7 +236,6 @@ function Granchild:change_volume(row,col)
   print("change_volume "..voice.." "..col.." "..util.linlin(1,8,-60,20,8-row))
   params:set(voice.."volume",util.linlin(1,7,0,1,8-row))
 end
-
 
 
 function Granchild:get_visual()
@@ -293,21 +301,30 @@ function Granchild:get_visual()
     end
   end
 
-  -- show pitch modifiers
+  -- show size modifiers
   for i=1,self.num_voices do 
+    local val = util.linlin(1,15,0,15,params:get(i.."size"))
     local col=4*(i-1)+1
-    local closet_mod = {4,10000}
-    local current_pitch = params:get(i.."pitch")
-    for j,p in ipairs(pitch_mods) do 
-      if math.abs(p-current_pitch) < closet_mod[2] then 
-        closet_mod =  {j,math.abs(p-current_pitch)}
-      end
-    end
-    local val = util.linlin(1,#pitch_mods,0,15,closet_mod[1])
     for row=3,4 do
       self.visual[row][col] = util.round(val)
     end
   end
+
+  -- -- show pitch modifiers
+  -- for i=1,self.num_voices do 
+  --   local col=4*(i-1)+1
+  --   local closet_mod = {4,10000}
+  --   local current_pitch = params:get(i.."pitch")
+  --   for j,p in ipairs(pitch_mods) do 
+  --     if math.abs(p-current_pitch) < closet_mod[2] then 
+  --       closet_mod =  {j,math.abs(p-current_pitch)}
+  --     end
+  --   end
+  --   local val = util.linlin(1,#pitch_mods,0,15,closet_mod[1])
+  --   for row=3,4 do
+  --     self.visual[row][col] = util.round(val)
+  --   end
+  -- end
 
   -- show current position
   for i=1,self.num_voices do 
