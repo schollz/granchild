@@ -2,6 +2,8 @@
 
 engine.name = "ZGlut"
 
+local granchild = include("granchild/lib/granchild")
+
 local function setup_params()
   params:add_separator("samples")
   
@@ -89,6 +91,21 @@ end
 
 function init() 
 	setup_params()
-	-- TODO setup grid
+
+  granchild_grid = granchild:new({grid_on=true,toggleable=true})
+  -- local kolor = include("kolor/lib/kolor")
+  -- kolor_grid = kolor:new({grid_on=false,toggleable=true})
+  -- kolor_grid:toggle_grid(false)
+  -- granchild_grid:toggle_grid(true)
+  -- kolor_grid:set_toggle_callback(function()
+  --   granchild_grid:toggle_grid()
+  -- end)
+  -- granchild_grid:set_toggle_callback(function()
+  --   kolor_grid:toggle_grid()
+  -- end)
+	-- setup grid
+  -- kolor_grid:lattice.hard_sync()
+  -- granchild_grid:lattice.hard_sync()
+
 	-- TODO setup toggler
 end

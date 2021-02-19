@@ -2,6 +2,7 @@ local lattice=include("kolor/lib/lattice")
 
 local Granchild={}
 
+local pitch_mods = {-12,-7,-5,0,5,7,12}
 
 function Granchild:new(args)
   local m=setmetatable({},{__index=Granchild})
@@ -44,15 +45,26 @@ function Granchild:new(args)
   -- keep track of pressed buttons
   m.pressed_buttons={}
 
+  -- define num voices
+  m.num_voices=4
 
   -- setup step sequencer
-  m.recording_voice=0 -- set to current recording track
-  m.recording_step=1
+  m.voices = {}
+  for i=1,m.num_voices do 
+    m.voices[i] = {
+      division = 4, -- 4 = quartner notes
+      is_playing = false,
+      is_recording = false,
+      steps = {},
+      step = 0,
+      pitch_mod_i=4,
+    }
+  end
 
   -- setup lfos
-  m.num_voices=4
   local mod_parameters={"speed","pos","jitter","size","spread"}
   m.mod_vals={}
+
   for i=1,m.num_voices do
     m.mod_vals[i]={}
     for j,mod in ipairs(mod_parameters) do
@@ -67,16 +79,15 @@ function Granchild:new(args)
   -- setup lattice
   -- lattice
   -- for keeping time of all the divisions
-  m.divisions={1,2,3,4,6,8,12,16}
   m.lattice=lattice:new({
     ppqn=8
   })
   m.timers={}
-  for i,division in ipairs(m.divisions) do
-    m.timers[i]={tt_beat=0}
-    m.timers[i].lattice=m.lattice:new_pattern{
+  for division=1,16 do
+    m.timers[division]={}
+    m.timers[division].lattice=m.lattice:new_pattern{
       action=function(t)
-        m:emit_note(i)
+        m:emit_note(division)
       end,
       division=1/division
     }
@@ -98,8 +109,17 @@ function Granchild:new(args)
   return m
 end
 
-function Granchild:emit_note(division_id)
- -- TODO
+function Granchild:emit_note(division)
+  for i=1,self.num_voices do 
+    if self.voices[i].is_playing and self.voices[i].division == division then 
+      self.voices[i].step = self.voices[i].step + 1
+      if self.voices[i].step > #self.voices[i].steps then 
+        self.voices[i].step = 1 
+      end
+      local step_val = self.voices[i].steps[self.voices[i].step]
+      params:set(i.."seek",util.linlin(1,16,0,1,step_val))
+    end
+  end
 end
 
 function Granchild:record_sequence(voice)
@@ -156,11 +176,43 @@ function Granchild:key_press(row,col,on)
     end
   end
 
-  if col==1 and on then
+  if col%4==2 and row<8 and on then
     -- change volume
-  elseif row<7 then
+    self:change_volume(row,col)
+  elseif col%4 > 2 and on then
     -- change position
+    self:change_position(row,col)
+  elseif col%4 == 1 and (row ==3 or row == 4) and on then
+    self:change_pitch_mod(row,col)
+  elseif col%4 == 1 and (row == 1 or row == 2) and on then
+    self:change_density_mod(row,col)
   end
+end
+
+function self:change_pitch_mod(row,col)
+  local voice = math.floor((col-3)/4)+1
+  params:delta(voice.."density",(row-1)*3-2)
+end
+
+function self:change_pitch_mod(row,col)
+  local voice = math.floor((col-3)/4)+1
+  self.voices[voice].pitch_mod_i = self.voices[voice].pitch_mod_i + (row-3)*3-2 
+  self.voices[voice].pitch_mod_i = util.clamp(1,#pitch_mods,self.voices[voice].pitch_mod_i)
+  params:set(voice.."pitch",pitch_mods[self.voices[voice].pitch_mod_i])
+end
+
+function self:change_position(row,col)
+  local voice = math.floor((col-3)/4)+1
+  col = col - 4*(voice-1) - 2 -- col now between 1 and 2
+  local val = (row-1)*2+col
+  print("change_position "..voice..": "..val)
+  params:set(voice.."seek",util.linlin(1,16,0,1,val))
+end
+
+function self:change_volume(row,col)
+  local voice = (col-2)/4+1
+  print("change_volume "..voice)
+  params:set(voice.."volume",util.linlin(7,1,-60,20,col))
 end
 
 
@@ -194,7 +246,57 @@ function Granchild:get_visual()
   end
 
   -- show the volume bar
- 
+  for i=1,self.num_voices do 
+    local min_row = util.round(util.linlin(-60,20,7,1,params:get(i.."volume")))
+    local col = 4*(i-1)+2
+    for row=min_row,7 do 
+      self.visual[row][col]=12
+    end
+  end
+
+  -- show stop button
+  for i=1,self.num_voices do 
+    local row=7
+    local col=4*(i-1)+1
+    self.visual[row][col] = 4
+    if self.voices[i].is_playing then 
+      self.visual[row][col] = 14
+    end
+  end
+
+  -- show rec button
+  for i=1,self.num_voices do 
+    local row=6
+    local col=4*(i-1)+1
+    self.visual[row][col] = 4
+    if self.voices[i].is_recording then 
+      self.visual[row][col] = 14
+    end
+  end
+
+  -- show density modifiers
+  for i=1,self.num_voices do 
+    local val = util.linlin(1,40,0,15,params:get(i.."density"))
+    for row=3,4 do
+      self.visual[row][col] = val
+    end
+  end
+
+  -- show pitch modifiers
+  for i=1,self.num_voices do 
+    local closet_mod = {4,10000}
+    local current_pitch = params:get(i.."pitch")
+    for j,p in ipairs(pitch_mods) do 
+      if math.abs(p-current_pitch) < closet_mod[2] then 
+        closet_mod =  {j,math.abs(p-current_pitch)}
+      end
+    end
+    local val = util.linlin(1,#pitch_mods,0,15,closet_mod[1])
+    for row=1,2 do
+      self.visual[row][col] = val
+    end
+  end
+
   return self.visual
 end
 
