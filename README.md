@@ -1,8 +1,9 @@
 # granchild
 
-granchild - sequence granulations
+sequence sample granules
 
-this script was born out of and inspired by @cfdrake's innovative twine and @justmat's inspiring mangl, both themselves based on @artfwo's amazing glut engine. so i consider this to be a grandchild of @artfwo's script, merging some of the things from @cfdrake (randomization in parameters) and some things from @justmat's script (lfos, greyhold integration). since its a granular grandchild of all these great scripts i call it "granchild".
+granchild is a granular grandchild. this script was born out of and inspired by @cfdrake's innovative twine and @justmat's inspiring mangl, both themselves based on @artfwo's amazing glut script. thus, i consider this script to be a grandchild of @artfwo's script, and child of the other two - merging some of the things from @cfdrake's twine (randomization in parameters) and some things from @justmat's script (lfos, greyhole integration).
+
 
 
 

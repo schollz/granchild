@@ -117,13 +117,13 @@ function Granchild:new(args)
   m.key_held.time=0.1
   m.key_held.event=function()
     -- only on column 1, 5, 9, 13
-    local cols = {1,5,9,13}
-    local cur_time = m:current_time()
-    for _, col in ipairs(cols) do
+    local cols={1,5,9,13}
+    local cur_time=m:current_time()
+    for _,col in ipairs(cols) do
       for row=1,8 do
-        if self.pressed_buttons[row..","..col] ~= nil then
-          local elapsed_time = cur_time - self.pressed_buttons[row..","..col]
-          if elapsed_time > 0.2 then 
+        if self.pressed_buttons[row..","..col]~=nil then
+          local elapsed_time=cur_time-self.pressed_buttons[row..","..col]
+          if elapsed_time>0.2 then
             m:key_press(row,col,true)
           end
         end
@@ -360,16 +360,33 @@ function Granchild:get_visual()
   --   end
   -- end
 
+  -- show current step
+  for i=1,self.num_voices do
+    local step=self.voices[i].step
+    if step>0 then
+      for j=1,step do
+        local row,col=self:pos_to_row_col((j-1)%21+1)
+        self.visual[row][col]=self.visual[row][col]+3
+        if self.visual[row][col]>15 then
+          self.visual[row][col]=1
+        end
+      end
+    end
+  end
   -- show current position
   for i=1,self.num_voices do
     local pos=math.floor(util.round(util.linlin(0,1,1,21,params:get(i.."seek"))))
-    local row=math.floor((pos-1)/3)+1
-    local col=pos-(row-1)*3+1
+    local row,col=self:pos_to_row_col(pos)
     col=col+(i-1)*4
-    self.visual[row][col]=12
+    self.visual[row][col]=15
   end
 
   return self.visual
+end
+
+function Granchild:pos_to_row_col(pos)
+  local row=math.floor((pos-1)/3)+1
+  local col=pos-(row-1)*3+1
 end
 
 function Granchild:current_time()

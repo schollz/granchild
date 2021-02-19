@@ -126,8 +126,12 @@ function init()
   clock.run(function()
     while true do
       clock.sleep(1/10) -- refresh
-      norns_screen=granchild_grid.visual
-      -- TODO: toggle between kolor and granchild
+      -- toggle norns screen between the granchild and kolor
+      if granchild_grid.grid_on then
+      	norns_screen=granchild_grid.visual
+      elseif kolor_grid ~= nil and kolor_grid.grid_on then
+	norns_screen=kolor_grid.visual
+      end
       redraw()
     end
   end) -- start the grid redraw clock
