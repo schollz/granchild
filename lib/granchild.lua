@@ -122,9 +122,8 @@ function Granchild:emit_note(division)
   end
 end
 
-function Granchild:record_sequence(voice)
-  self.recording_voice=voice
-  self.recording_step=1
+function Granchild:toggle_recording(voice)
+  -- TODO
 end
 
 function Granchild:toggle_grid(on)
@@ -205,6 +204,9 @@ function self:change_position(row,col)
   local voice = math.floor((col-3)/4)+1
   col = col - 4*(voice-1) - 2 -- col now between 1 and 2
   local val = (row-1)*2+col
+  if self.voices[voice].is_recording then 
+    table.insert(self.voices[voice].steps,val)
+  end
   print("change_position "..voice..": "..val)
   params:set(voice.."seek",util.linlin(1,16,0,1,val))
 end
