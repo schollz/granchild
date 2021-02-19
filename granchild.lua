@@ -1,4 +1,10 @@
--- arngulator
+-- granchild v1.0.0
+-- granular sequencer
+--
+-- llllllll.co/t/granchild
+--
+--
+--
 
 engine.name="ZGlut"
 
@@ -193,4 +199,4 @@ end
 function rerun()
   norns.script.load(norns.state.script)
 end
- 
+
