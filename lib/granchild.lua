@@ -118,10 +118,14 @@ function Granchild:new(args)
   m.key_held.event=function()
     -- only on column 1, 5, 9, 13
     local cols = {1,5,9,13}
+    local cur_time = m:current_time()
     for _, col in ipairs(cols) do
       for row=1,8 do
         if self.pressed_buttons[row..","..col] ~= nil then
-
+          local elapsed_time = cur_time - self.pressed_buttons[row..","..col]
+          if elapsed_time > 0.2 then 
+            m:key_press(row,col,true)
+          end
         end
       end
     end
