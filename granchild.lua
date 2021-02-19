@@ -38,11 +38,11 @@ local function setup_params()
 
     params:add_control(i .. "send", "delay send", controlspec.new(0.0, 1.0, "lin", 0.01, .2))
     params:set_action(i .. "send", function(value) engine.send(i, value) end)
+
+    params:add_control(i .. "speed", i .. " speed", controlspec.new(-2.0, 2.0, "lin", 0.25, 0,"",0.25/4))
+    params:set_action(i .. "speed", function(value) engine.speed(i, value) end)
   
     -- these parameters oscillate
-
-    params:add_taper(i .. "speed", i .. " speed", -10, 10, 0, 0, "%")
-    params:set_action(i .. "speed", function(value) engine.speed(i, value / 100) end)
   
     params:add_control(i .. "pos", "pos", controlspec.new(-1/40, 1/40, "lin", 0.001, 0))
     params:set_action(i .. "pos", function(value)  engine.seek(i, util.clamp(value+params:get(i.."seek"),0,1)) end)

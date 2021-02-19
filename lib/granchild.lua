@@ -63,9 +63,7 @@ function Granchild:new(args)
 
   -- setup lfos
   local mod_parameters={
-    {name="speed",range={0,5},lfo={16,64}},
     {name="jitter",range={5,50},lfo={32,64}},
-    -- {name="size",range={75,500},lfo={16,32}},
     {name="spread",range={0,100},lfo={16,24}},
   }
   -- TODO
@@ -188,6 +186,8 @@ function Granchild:key_press(row,col,on)
     self:change_density_mod(row,col)
   elseif col%4 == 1 and (row ==3 or row == 4) and on then
     self:change_size(row,col)
+  elseif col%4 == 1 and (row ==5 or row == 6) and on then
+    self:change_speed(row,col)
   elseif col%4 == 1 and (row ==7 or row == 8) and on then
     -- change volume
     self:change_volume(row,col)
@@ -208,6 +208,13 @@ function Granchild:change_size(row,col)
   local diff = -1 * ((row-3)*2-1)
   params:delta(voice.."size",diff)
   print("change_size "..voice.." "..diff.." "..params:get(voice.."size"))
+end
+
+function Granchild:change_speed(row,col)
+  local voice =  math.floor((col-1)/4)+1
+  local diff = -1 * ((row-5)*2-1)
+  params:delta(voice.."speed",diff)
+  print("change_speed "..voice.." "..diff.." "..params:get(voice.."speed"))
 end
 
 function Granchild:change_volume(row,col)
