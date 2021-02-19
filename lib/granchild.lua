@@ -67,8 +67,6 @@ function Granchild:new(args)
     {name="jitter",range={5,50},lfo={32,64}},
     {name="spread",range={0,100},lfo={16,24}},
   }
-  -- TODO
-  -- ADD SIZE OFFSET, tie it to where the octave keys are
   m.mod_vals={}
 
   for i=1,m.num_voices do
@@ -143,7 +141,7 @@ function Granchild:emit_note(division)
         self.voices[i].step=1
       end
       local step_val=self.voices[i].steps[self.voices[i].step]
-      params:set(i.."seek",util.linlin(1,16,0,1,step_val)+(math.random()-0.5)/100)
+      params:set(voice.."seek",util.linlin(1,21,0,1,step_val)+(math.random()-0.5)/100)
     end
   end
 end
@@ -208,9 +206,29 @@ function Granchild:key_press(row,col,on)
   elseif col%4==1 and (row==7 or row==8) and on then
     self:change_volume(row,col)
   elseif col%4==3 and row==8 and on then
-    -- toggle recording
+    self:toggle_recording(col)
+  elseif col%4==0 and row==8 and on then
+    self:toggle_playing(col)
   end
 end
+
+
+function Granchild:toggle_recording(col)
+  local voice=math.floor((col-1)/4)+1
+  self.voices[voice].is_recording=not self.voices[voice].is_recording
+  if self.voices[voice].is_recording then
+    self.voices[voice].is_playing=false
+  end
+end
+
+function Granchild:toggle_playing(col)
+  local voice=math.floor((col-1)/4)+1
+  self.voices[voice].is_playing=not self.voices[voice].is_playing
+  if self.voices[voice].is_playing then
+    self.voices[voice].is_recording=false
+  end
+end
+
 
 function Granchild:change_density_mod(row,col)
   local voice=math.floor((col-1)/4)+1
