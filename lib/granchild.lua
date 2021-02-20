@@ -112,7 +112,7 @@ function Granchild:new(args)
 
   -- metro for checking if keys are held to toggle re-presses
   m.key_held=metro.init()
-  m.key_held.time=0.05
+  m.key_held.time=0.1
   m.key_held.event=function()
     -- only on column 1, 5, 9, 13
     local cols={1,5,9,13}
@@ -121,7 +121,7 @@ function Granchild:new(args)
       for row=1,8 do
         if m.pressed_buttons[row..","..col]~=nil then
           local elapsed_time=cur_time-m.pressed_buttons[row..","..col]
-          if elapsed_time>0.05 then
+          if elapsed_time>0.1 then
             m:key_press(row,col,true)
           end
         end
@@ -149,7 +149,7 @@ function Granchild:emit_note(division)
         self.voices[i].step=1
       end
       local step_val=self.voices[i].steps[self.voices[i].step]
-      if step_val~=self.voices[i].step_val then
+      if step_val~=self.voices[i].step_val and step_val ~= nil then
         params:set(i.."seek",util.linlin(1,21,0,1,step_val)+(math.random()-0.5)/100)
       end
       self.voices[i].step_val=step_val
@@ -398,17 +398,19 @@ function Granchild:get_visual()
 
   -- show current position
   for i=1,self.num_voices do
-    local pos=util.linlin(0,1,1,21,self.voices[i].position)
-    local pos1=math.floor(pos)
-    local diff=pos-pos1
-    local pos2=pos1+1
-    if pos2>21 then
-      pos2=1
+    if self.voices[i].position ~= nil then 
+      local pos=util.linlin(0,1,1,21,self.voices[i].position)
+      local pos1=math.floor(pos)
+      local diff=pos-pos1
+      local pos2=pos1+1
+      if pos2>21 then
+        pos2=1
+      end
+      local row1,col1=self:pos_to_row_col(pos1)
+      local row2,col2=self:pos_to_row_col(pos2)
+      self.visual[row2][col2+(i-1)*4]=util.round(util.linlin(0,1,0,15,diff))
+      self.visual[row1][col1+(i-1)*4]=15-self.visual[row2][col2+(i-1)*4]
     end
-    local row1,col1=self:pos_to_row_col(pos1)
-    local row2,col2=self:pos_to_row_col(pos2)
-    self.visual[row2][col2+(i-1)*4]=util.round(util.linlin(0,1,0,15,diff))
-    self.visual[row1][col1+(i-1)*4]=15-self.visual[row2][col2+(i-1)*4]
   end
 
   return self.visual

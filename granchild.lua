@@ -35,7 +35,7 @@ local function setup_params()
     params:add_control(i.."volume","volume",controlspec.new(0,1.0,"lin",0.05,0.25,"vol",0.05/1))
     params:set_action(i.."volume",function(value) engine.volume(i,value) end)
 
-    params:add_control(i.."density","density",controlspec.new(1,40,"exp",1,12,"/beat",1/40))
+    params:add_control(i.."density","density",controlspec.new(1,40,"lin",1,12,"/beat",1/40))
     params:set_action(i.."density",function(value) engine.density(i,value/(4*clock.get_beat_sec())) end)
 
     params:add_control(i.."pitch","pitch",controlspec.new(-48,48,"lin",1,0,"note",1/96))
@@ -53,7 +53,7 @@ local function setup_params()
     params:add_control(i.."send","delay send",controlspec.new(0.0,1.0,"lin",0.01,.2))
     params:set_action(i.."send",function(value) engine.send(i,value) end)
 
-    params:add_control(i.."speed","speed",controlspec.new(-2.0,2.0,"lin",0.01,0,"",0.01/4))
+    params:add_control(i.."speed","speed",controlspec.new(-2.0,2.0,"lin",0.05,0,"",0.05/4))
     params:set_action(i.."speed",function(value) engine.speed(i,value) end)
 
     params:add_control(i.."division","division",controlspec.new(1,16,"lin",1,4,"pulses",1/16))
@@ -139,14 +139,14 @@ function init()
     end
   end) -- start the grid redraw clock
 
-  params:set("1sample",_path.audio.."tehn/whirl2.aif")
-  params:set("1play",2)
-  params:set("2sample",_path.audio.."tehn/whirl1.aif")
-  params:set("2play",2)
-  params:set("2pitch",12)
-  params:set("3sample",_path.audio.."tehn/drumev.wav")
-  params:set("3density",4)
-  params:set("3size",7)
+  params:set("1sample",_path.audio.."splices/rach1.wav")
+  -- params:set("1play",2)
+  -- params:set("2sample",_path.audio.."tehn/whirl1.aif")
+  -- params:set("2play",2)
+  -- params:set("2pitch",12)
+  -- params:set("3sample",_path.audio.."tehn/drumev.wav")
+  -- params:set("3density",4)
+  -- params:set("3size",7)
 end
 
 
