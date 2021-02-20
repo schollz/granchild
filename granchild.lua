@@ -13,8 +13,8 @@ local granchild=include("granchild/lib/granchild")
 local position={1,1}
 local press_positions={{0,0},{0,0}}
 local norns_screen={}
-local divisions = {1,2,4,6,8,12,16}
-local division_names = {"2 wn","wn","hn","hn-t","qn","qn-t","eighth"}
+local divisions={1,2,4,6,8,12,16}
+local division_names={"2 wn","wn","hn","hn-t","qn","qn-t","eighth"}
 
 
 local function setup_params()

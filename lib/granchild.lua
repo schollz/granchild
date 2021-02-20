@@ -142,7 +142,7 @@ function Granchild:new(args)
 end
 
 function Granchild:emit_note(division)
-  local update = false
+  local update=false
   for i=1,self.num_voices do
     if self.voices[i].is_playing and self.voices[i].division==division then
       self.voices[i].step=self.voices[i].step+1
@@ -150,14 +150,14 @@ function Granchild:emit_note(division)
         self.voices[i].step=1
       end
       local step_val=self.voices[i].steps[self.voices[i].step]
-      if step_val~=self.voices[i].step_val and step_val ~= nil then
+      if step_val~=self.voices[i].step_val and step_val~=nil then
         params:set(i.."seek",util.linlin(1,21,0,1,step_val)+(math.random()-0.5)/100)
       end
       self.voices[i].step_val=step_val
-      update = true
+      update=true
     end
   end
-  if update then 
+  if update then
     self:grid_redraw()
   end
 end
@@ -403,7 +403,7 @@ function Granchild:get_visual()
 
   -- show current position
   for i=1,self.num_voices do
-    if self.voices[i].position ~= nil then 
+    if self.voices[i].position~=nil then
       local pos=util.linlin(0,1,1,21,self.voices[i].position)
       local pos1=math.floor(pos)
       local diff=pos-pos1
