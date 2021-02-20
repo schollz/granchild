@@ -53,7 +53,7 @@ function Granchild:new(args)
   m.voices={}
   for i=1,m.num_voices do
     m.voices[i]={
-      division=4,-- 4 = quartner notes
+      division=8,-- 8 = quartner notes
       is_playing=false,
       is_recording=false,
       steps={},
@@ -85,7 +85,7 @@ function Granchild:new(args)
   -- lattice
   -- for keeping time of all the divisions
   m.lattice=lattice:new({
-    ppqn=8
+    ppqn=48
   })
   m.timers={}
   for division=1,16 do
@@ -142,6 +142,7 @@ function Granchild:new(args)
 end
 
 function Granchild:emit_note(division)
+  local update = false
   for i=1,self.num_voices do
     if self.voices[i].is_playing and self.voices[i].division==division then
       self.voices[i].step=self.voices[i].step+1
@@ -153,7 +154,11 @@ function Granchild:emit_note(division)
         params:set(i.."seek",util.linlin(1,21,0,1,step_val)+(math.random()-0.5)/100)
       end
       self.voices[i].step_val=step_val
+      update = true
     end
+  end
+  if update then 
+    self:grid_redraw()
   end
 end
 

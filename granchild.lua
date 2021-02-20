@@ -13,6 +13,8 @@ local granchild=include("granchild/lib/granchild")
 local position={1,1}
 local press_positions={{0,0},{0,0}}
 local norns_screen={}
+local divisions = {1,2,4,6,8,12,16}
+local division_names = {"2 wn","wn","hn","hn-t","qn","qn-t","eighth"}
 
 
 local function setup_params()
@@ -56,8 +58,8 @@ local function setup_params()
     params:add_control(i.."speed","speed",controlspec.new(-2.0,2.0,"lin",0.05,0,"",0.05/4))
     params:set_action(i.."speed",function(value) engine.speed(i,value) end)
 
-    params:add_control(i.."division","division",controlspec.new(1,16,"lin",1,4,"pulses",1/16))
-  params:set_action(i.."division",function(value) if granchild_grid~=nil then granchild_grid:set_division(i,value) end end)
+    params:add_option(i.."division","division",division_names,5)
+  params:set_action(i.."division",function(value) if granchild_grid~=nil then granchild_grid:set_division(i,divisions[value]) end end)
 
   params:add_control(i.."pos","pos",controlspec.new(-1/40,1/40,"lin",0.001,0))
   params:set_action(i.."pos",function(value) engine.seek(i,util.clamp(value+params:get(i.."seek"),0,1)) end)
@@ -139,7 +141,10 @@ function init()
     end
   end) -- start the grid redraw clock
 
-  params:set("1sample",_path.audio.."splices/rach1.wav")
+  params:set("1sample",_path.audio.."tape/0034.wav")
+  params:set("2sample",_path.audio.."tape/0035.wav")
+  params:set("3sample",_path.audio.."tape/0036.wav")
+  -- params:set("1sample",_path.audio.."splices/rach1.wav")
   -- params:set("1play",2)
   -- params:set("2sample",_path.audio.."tehn/whirl1.aif")
   -- params:set("2play",2)

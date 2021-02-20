@@ -87,7 +87,7 @@ Engine_ZGlut : CroneEngine {
 			level = env;
 
 			Out.ar(out, sig * level * gain);
-			Out.ar(effectBus, sig * level * send * gain);
+			Out.ar(effectBus, sig * level * send );
 			Out.kr(phase_out, pos_sig);
 			// ignore gain for level out
 			Out.kr(level_out, level);
