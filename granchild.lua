@@ -56,6 +56,9 @@ local function setup_params()
     params:add_control(i.."speed",i.." speed",controlspec.new(-2.0,2.0,"lin",0.25,0,"",0.25/4))
     params:set_action(i.."speed",function(value) engine.speed(i,value) end)
 
+    params:add_control(i.."division",i.." division",controlspec.new(1,16,"lin",1,4,"pulses",1/16))
+    params:set_action(i.."division",function(value) if granchild_grid ~= nil then granchild_grid:set_division(i,value) end end)
+
     -- these parameters oscillate
 
     params:add_control(i.."pos","pos",controlspec.new(-1/40,1/40,"lin",0.001,0))

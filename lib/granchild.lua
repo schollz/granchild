@@ -93,7 +93,7 @@ function Granchild:new(args)
       action=function(t)
         m:emit_note(division)
       end,
-      division=1/division
+      division=1/(division/2)
     }
   end
   m.lattice:start()
@@ -205,9 +205,9 @@ function Granchild:key_press(row,col,on)
     self:change_speed(row,col)
   elseif col%4==1 and (row==7 or row==8) and on then
     self:change_volume(row,col)
-  elseif col%4==3 and row==8 and on then
+  elseif col%4==2 and row==8 and on then
     self:toggle_recording(col)
-  elseif col%4==0 and row==8 and on then
+  elseif col%4==3 and row==8 and on then
     self:toggle_playing(col)
   end
 end
@@ -217,6 +217,8 @@ function Granchild:toggle_recording(col)
   local voice=math.floor((col-1)/4)+1
   self.voices[voice].is_recording=not self.voices[voice].is_recording
   if self.voices[voice].is_recording then
+    self.voices[voice].steps = {}
+    self.voices[voice].step = 0
     self.voices[voice].is_playing=false
   end
 end
@@ -229,6 +231,10 @@ function Granchild:toggle_playing(col)
   end
 end
 
+
+function Granchild:set_division(voice,division)
+  self.voices[voice].division = division
+end
 
 function Granchild:change_density_mod(row,col)
   local voice=math.floor((col-1)/4)+1
@@ -308,7 +314,7 @@ function Granchild:get_visual()
   -- show stop/play button
   for i=1,self.num_voices do
     local row=8
-    local col=4*(i-1)+4
+    local col=4*(i-1)+3
     self.visual[row][col]=4
     if self.voices[i].is_playing then
       self.visual[row][col]=14
@@ -318,7 +324,7 @@ function Granchild:get_visual()
   -- show rec button
   for i=1,self.num_voices do
     local row=8
-    local col=4*(i-1)+3
+    local col=4*(i-1)+2
     self.visual[row][col]=4
     if self.voices[i].is_recording then
       self.visual[row][col]=14
@@ -357,28 +363,16 @@ function Granchild:get_visual()
     self.visual[8][col]=15-util.round(val)
   end
 
-  -- -- show pitch modifiers
-  -- for i=1,self.num_voices do
-  --   local col=4*(i-1)+1
-  --   local closet_mod = {4,10000}
-  --   local current_pitch = params:get(i.."pitch")
-  --   for j,p in ipairs(pitch_mods) do
-  --     if math.abs(p-current_pitch) < closet_mod[2] then
-  --       closet_mod =  {j,math.abs(p-current_pitch)}
-  --     end
-  --   end
-  --   local val = util.linlin(1,#pitch_mods,0,15,closet_mod[1])
-  --   for row=3,4 do
-  --     self.visual[row][col] = util.round(val)
-  --   end
-  -- end
-
   -- show current step
   for i=1,self.num_voices do
     local step=self.voices[i].step
+    if self.voices[i].is_recording then 
+      step = #self.voices[i].steps
+    end
     if step>0 then
       for j=1,step do
         local row,col=self:pos_to_row_col((j-1)%21+1)
+        col = col + 4*(i-1)
         self.visual[row][col]=self.visual[row][col]+3
         if self.visual[row][col]>15 then
           self.visual[row][col]=1
@@ -386,6 +380,7 @@ function Granchild:get_visual()
       end
     end
   end
+
   -- show current position
   for i=1,self.num_voices do
     local pos=math.floor(util.round(util.linlin(0,1,1,21,params:get(i.."seek"))))
