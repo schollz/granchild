@@ -104,7 +104,7 @@ function Granchild:new(args)
   m.grid_refresh.time=0.1
   m.grid_refresh.event=function()
     m:update_lfos() -- use this metro to update lfos too
-    if m.g.cols>0 and m.grid_on then
+    if m.grid_on then
       m:grid_redraw()
     end
   end
@@ -119,8 +119,8 @@ function Granchild:new(args)
     local cur_time=m:current_time()
     for _,col in ipairs(cols) do
       for row=1,8 do
-        if self.pressed_buttons[row..","..col]~=nil then
-          local elapsed_time=cur_time-self.pressed_buttons[row..","..col]
+        if m.pressed_buttons[row..","..col]~=nil then
+          local elapsed_time=cur_time-m.pressed_buttons[row..","..col]
           if elapsed_time>0.2 then
             m:key_press(row,col,true)
           end
@@ -141,7 +141,7 @@ function Granchild:emit_note(division)
         self.voices[i].step=1
       end
       local step_val=self.voices[i].steps[self.voices[i].step]
-      params:set(voice.."seek",util.linlin(1,21,0,1,step_val)+(math.random()-0.5)/100)
+      params:set(i.."seek",util.linlin(1,21,0,1,step_val)+(math.random()-0.5)/100)
     end
   end
 end
@@ -400,6 +400,7 @@ end
 function Granchild:pos_to_row_col(pos)
   local row=math.floor((pos-1)/3)+1
   local col=pos-(row-1)*3+1
+  return row,col
 end
 
 function Granchild:current_time()

@@ -21,9 +21,9 @@ local function setup_params()
   for i=1,num_voices do
     params:add_group("sample "..i,15)
     params:add_file(i.."sample",i.." sample")
-    params:set_action(i.."sample",function(file) 
-	    engine.read(i,file) 
-	    params:set(i.."play",2)
+    params:set_action(i.."sample",function(file)
+      engine.read(i,file)
+      params:set(i.."play",2)
     end)
 
     params:add_option(i.."play","play",{"off","on"},1)
@@ -128,9 +128,9 @@ function init()
       clock.sleep(1/10) -- refresh
       -- toggle norns screen between the granchild and kolor
       if granchild_grid.grid_on then
-      	norns_screen=granchild_grid.visual
-      elseif kolor_grid ~= nil and kolor_grid.grid_on then
-	norns_screen=kolor_grid.visual
+        norns_screen=granchild_grid.visual
+      elseif kolor_grid~=nil and kolor_grid.grid_on then
+        norns_screen=kolor_grid.visual
       end
       redraw()
     end
@@ -172,7 +172,7 @@ function key(k,z)
       end
       press_positions[k-1]={position[1],position[2]}
     end
-    d:key_press(press_positions[k-1][1],press_positions[k-1][2],z==1)
+    granchild_grid:key_press(press_positions[k-1][1],press_positions[k-1][2],z==1)
   end
 end
 
@@ -184,21 +184,23 @@ function redraw()
   screen.rect(1,1,128,64)
   screen.fill()
 
-  local gd=norns_screen
-  rows=#gd
-  cols=#gd[1]
-  for row=1,rows do
-    for col=1,cols do
-      if gd[row][col]~=0 then
-        screen.level(gd[row][col])
-        screen.rect(col*8-7,row*8-8+1,6,6)
-        screen.fill()
+  if norns_screen~=nil and norns_screen[1]~=nil then
+    local gd=norns_screen
+    rows=#gd
+    cols=#gd[1]
+    for row=1,rows do
+      for col=1,cols do
+        if gd[row][col]~=0 then
+          screen.level(gd[row][col])
+          screen.rect(col*8-7,row*8-8+1,6,6)
+          screen.fill()
+        end
       end
     end
+    screen.level(15)
+    screen.rect(position[2]*8-7,position[1]*8-8+1,7,7)
+    screen.stroke()
   end
-  screen.level(15)
-  screen.rect(position[2]*8-7,position[1]*8-8+1,7,7)
-  screen.stroke()
 
   screen.update()
 end
