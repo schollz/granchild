@@ -112,7 +112,7 @@ function Granchild:new(args)
 
   -- metro for checking if keys are held to toggle re-presses
   m.key_held=metro.init()
-  m.key_held.time=0.1
+  m.key_held.time=0.05
   m.key_held.event=function()
     -- only on column 1, 5, 9, 13
     local cols={1,5,9,13}
@@ -121,7 +121,7 @@ function Granchild:new(args)
       for row=1,8 do
         if m.pressed_buttons[row..","..col]~=nil then
           local elapsed_time=cur_time-m.pressed_buttons[row..","..col]
-          if elapsed_time>0.2 then
+          if elapsed_time>0.05 then
             m:key_press(row,col,true)
           end
         end
