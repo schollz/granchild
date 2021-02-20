@@ -245,17 +245,17 @@ Engine_ZGlut : CroneEngine {
 			voices[voice].set(\gain, msg[2]);
 		});
 
-		// nvoices.do({ arg i;
-		// 	this.addPoll(("phase_" ++ (i+1)).asSymbol, {
-		// 		var val = phases[i].getSynchronous;
-		// 		val
-		// 	});
+		nvoices.do({ arg i;
+			this.addPoll(("phase_" ++ (i+1)).asSymbol, {
+				var val = phases[i].getSynchronous;
+				val
+			});
 
 		// 	this.addPoll(("level_" ++ (i+1)).asSymbol, {
 		// 		var val = levels[i].getSynchronous;
 		// 		val
 		// 	});
-		// });
+	 });
 
 		seek_tasks = Array.fill(nvoices, { arg i;
 			Routine {}

@@ -58,6 +58,7 @@ function Granchild:new(args)
       is_recording=false,
       steps={},
       step=0,
+      step_val=0,
       pitch_mod_i=4,
     }
   end
@@ -93,8 +94,7 @@ function Granchild:new(args)
       action=function(t)
         m:emit_note(division)
       end,
-      division=1/(division/2)
-    }
+    division=1/(division/2)}
   end
   m.lattice:start()
 
@@ -130,6 +130,14 @@ function Granchild:new(args)
   end
   m.key_held:start()
 
+  -- polling for getting positions
+  for i=1,m.num_voices do
+    local phase_poll=poll.set('phase_'..i,function(pos) m.voices[i].position=pos end)
+    phase_poll.time=0.1
+    phase_poll:start()
+  end
+
+
   return m
 end
 
@@ -141,7 +149,10 @@ function Granchild:emit_note(division)
         self.voices[i].step=1
       end
       local step_val=self.voices[i].steps[self.voices[i].step]
-      params:set(i.."seek",util.linlin(1,21,0,1,step_val)+(math.random()-0.5)/100)
+      if step_val~=self.voices[i].step_val then
+        params:set(i.."seek",util.linlin(1,21,0,1,step_val)+(math.random()-0.5)/100)
+      end
+      self.voices[i].step_val=step_val
     end
   end
 end
@@ -217,8 +228,9 @@ function Granchild:toggle_recording(col)
   local voice=math.floor((col-1)/4)+1
   self.voices[voice].is_recording=not self.voices[voice].is_recording
   if self.voices[voice].is_recording then
-    self.voices[voice].steps = {}
-    self.voices[voice].step = 0
+    self.voices[voice].steps={}
+    self.voices[voice].step=0
+    self.voices[voice].step_val=0
     self.voices[voice].is_playing=false
   end
 end
@@ -228,12 +240,13 @@ function Granchild:toggle_playing(col)
   self.voices[voice].is_playing=not self.voices[voice].is_playing
   if self.voices[voice].is_playing then
     self.voices[voice].is_recording=false
+    self.voices[voice].step_val=0
   end
 end
 
 
 function Granchild:set_division(voice,division)
-  self.voices[voice].division = division
+  self.voices[voice].division=division
 end
 
 function Granchild:change_density_mod(row,col)
@@ -365,17 +378,19 @@ function Granchild:get_visual()
 
   -- show current step
   for i=1,self.num_voices do
-    local step=self.voices[i].step
-    if self.voices[i].is_recording then 
-      step = #self.voices[i].steps
-    end
-    if step>0 then
-      for j=1,step do
-        local row,col=self:pos_to_row_col((j-1)%21+1)
-        col = col + 4*(i-1)
-        self.visual[row][col]=self.visual[row][col]+3
-        if self.visual[row][col]>15 then
-          self.visual[row][col]=1
+    if self.voices[i].is_recording or self.voices[i].is_playing then
+      local step=self.voices[i].step
+      if self.voices[i].is_recording then
+        step=#self.voices[i].steps
+      end
+      if step>0 then
+        for j=1,step do
+          local row,col=self:pos_to_row_col((j-1)%21+1)
+          col=col+4*(i-1)
+          self.visual[row][col]=self.visual[row][col]+3
+          if self.visual[row][col]>15 then
+            self.visual[row][col]=1
+          end
         end
       end
     end
@@ -383,10 +398,17 @@ function Granchild:get_visual()
 
   -- show current position
   for i=1,self.num_voices do
-    local pos=math.floor(util.round(util.linlin(0,1,1,21,params:get(i.."seek"))))
-    local row,col=self:pos_to_row_col(pos)
-    col=col+(i-1)*4
-    self.visual[row][col]=15
+    local pos=util.linlin(0,1,1,21,self.voices[i].position)
+    local pos1=math.floor(pos)
+    local diff=pos-pos1
+    local pos2=pos1+1
+    if pos2>21 then
+      pos2=1
+    end
+    local row1,col1=self:pos_to_row_col(pos1)
+    local row2,col2=self:pos_to_row_col(pos2)
+    self.visual[row2][col2+(i-1)*4]=util.round(util.linlin(0,1,0,15,diff))
+    self.visual[row1][col1+(i-1)*4]=15-self.visual[row2][col2+(i-1)*4]
   end
 
   return self.visual
