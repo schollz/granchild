@@ -19,8 +19,8 @@ local function setup_params()
   params:add_separator("samples")
   local num_voices=4
   for i=1,num_voices do
-    params:add_group("sample "..i,15)
-    params:add_file(i.."sample",i.." sample")
+    params:add_group("sample "..i,16)
+    params:add_file(i.."sample","sample")
     params:set_action(i.."sample",function(file)
       engine.read(i,file)
       params:set(i.."play",2)
@@ -32,16 +32,16 @@ local function setup_params()
     params:add_control(i.."seek","seek",controlspec.new(0,1,"lin",0.001,0,"",1/1000))
     params:set_action(i.."seek",function(value) engine.seek(i,util.clamp(value+params:get(i.."pos"),0,1)) end)
 
-    params:add_control(i.."volume",i.." volume",controlspec.new(0,1.0,"lin",0.1,0.25,"vol",1/10))
+    params:add_control(i.."volume","volume",controlspec.new(0,1.0,"lin",0.05,0.25,"vol",0.05/1))
     params:set_action(i.."volume",function(value) engine.volume(i,value) end)
 
-    params:add_control(i.."density",i.." density",controlspec.new(1,40,"exp",1,12,"/beat",1/40))
+    params:add_control(i.."density","density",controlspec.new(1,40,"exp",1,12,"/beat",1/40))
     params:set_action(i.."density",function(value) engine.density(i,value/(4*clock.get_beat_sec())) end)
 
-    params:add_control(i.."pitch",i.." pitch",controlspec.new(-48,48,"lin",1,0,"note",1/48))
+    params:add_control(i.."pitch","pitch",controlspec.new(-48,48,"lin",1,0,"note",1/48))
     params:set_action(i.."pitch",function(value) engine.pitch(i,math.pow(0.5,-value/12)) end)
 
-    params:add_taper(i.."fade",i.." att / dec",1,9000,1000,3,"ms")
+    params:add_taper(i.."fade","att / dec",1,9000,1000,3,"ms")
     params:set_action(i.."fade",function(value) engine.envscale(i,value/1000) end)
 
     params:add_control(i.."cutoff","filter cutoff",controlspec.new(20,20000,"exp",0,20000,"hz"))
@@ -53,24 +53,24 @@ local function setup_params()
     params:add_control(i.."send","delay send",controlspec.new(0.0,1.0,"lin",0.01,.2))
     params:set_action(i.."send",function(value) engine.send(i,value) end)
 
-    params:add_control(i.."speed",i.." speed",controlspec.new(-2.0,2.0,"lin",0.25,0,"",0.25/4))
+    params:add_control(i.."speed","speed",controlspec.new(-2.0,2.0,"lin",0.25,0,"",0.25/4))
     params:set_action(i.."speed",function(value) engine.speed(i,value) end)
 
-    params:add_control(i.."division",i.." division",controlspec.new(1,16,"lin",1,4,"pulses",1/16))
+    params:add_control(i.."division","division",controlspec.new(1,16,"lin",1,4,"pulses",1/16))
     params:set_action(i.."division",function(value) if granchild_grid ~= nil then granchild_grid:set_division(i,value) end end)
-
-    -- these parameters oscillate
 
     params:add_control(i.."pos","pos",controlspec.new(-1/40,1/40,"lin",0.001,0))
     params:set_action(i.."pos",function(value) engine.seek(i,util.clamp(value+params:get(i.."seek"),0,1)) end)
 
-    params:add_taper(i.."jitter",i.." jitter",0,500,0,5,"ms")
-    params:set_action(i.."jitter",function(value) engine.jitter(i,value/1000) end)
-
-    params:add_control(i.."size",i.." size",controlspec.new(1,15,"lin",1,5,"",1/15))
+    params:add_control(i.."size","size",controlspec.new(1,15,"lin",1,5,"",1/15))
     params:set_action(i.."size",function(value) engine.size(i,value*clock.get_beat_sec()/10) end)
 
-    params:add_taper(i.."spread",i.." spread",0,100,0,0,"%")
+    -- these parameters oscillate
+
+    params:add_taper(i.."jitter","jitter",0,500,0,5,"ms")
+    params:set_action(i.."jitter",function(value) engine.jitter(i,value/1000) end)
+
+    params:add_taper(i.."spread","spread",0,100,0,0,"%")
     params:set_action(i.."spread",function(value) engine.spread(i,value/100) end)
 
   end
@@ -168,11 +168,6 @@ end
 function key(k,z)
   if k>1 then
     if z==1 then
-      if util.file_exists("/home/we/dust/code/tmi") then
-        if k==3 then
-          --m:toggle_play()
-        end
-      end
       press_positions[k-1]={position[1],position[2]}
     end
     granchild_grid:key_press(press_positions[k-1][1],press_positions[k-1][2],z==1)
