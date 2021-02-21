@@ -48,6 +48,11 @@ function Granchild:new(args)
   -- define num voices
   m.num_voices=4
 
+  -- recording to tape
+  m.tape_voice = 0 
+  m.tape_start = 0
+
+
   -- setup step sequencer
   m.voices={}
   for i=1,m.num_voices do
@@ -64,8 +69,12 @@ function Granchild:new(args)
 
   -- setup lfos
   local mod_parameters={
-    {name="jitter",range={5,50},lfo={32,64}},
+    {name="jitter",range={5,100},lfo={32,64}},
     {name="spread",range={0,100},lfo={16,24}},
+    {name="volume",range={0,0.25},lfo={16,24}},
+    {name="speed",range={-0.05,0.05},lfo={16,24}},
+    {name="density",range={3,16},lfo={16,24}},
+    {name="size",range={2,12},lfo={24,58}},
   }
   m.mod_vals={}
 
@@ -76,7 +85,7 @@ function Granchild:new(args)
       local range=minmax
       -- local center_val=(range[2]-range[1])/2
       -- range={range[1]+(center_val-range[1])*math.random(0,100)/100,range[2]-(range[2]-center_val)*math.random(0,100)/100}
-      m.mod_vals[i][j]={name=i..mod.name,minmax=minmax,range=range,period=math.random(mod.lfo[1],mod.lfo[2]),offset=math.random()*30}
+      m.mod_vals[i][j]={name=mod.name,minmax=minmax,range=range,period=math.random(mod.lfo[1],mod.lfo[2]),offset=math.random()*30}
     end
   end
 
@@ -224,6 +233,8 @@ function Granchild:key_press(row,col,on)
     self:toggle_recording(col)
   elseif col%4==3 and row==8 and on then
     self:toggle_playing(col)
+  elseif col%4==0 and row==8 and on then
+    self:toggle_tape_rec(col)
   end
 end
 
@@ -248,6 +259,14 @@ function Granchild:toggle_playing(col)
   end
 end
 
+function Granchild:toggle_tape_rec(col)
+  local voice=math.floor((col-1)/4)+1
+  if self.tape_voice == voice then 
+    self:rec_stop()
+  else
+    self:rec_start(voice)    
+  end
+end
 
 function Granchild:set_division(voice,division)
   self.voices[voice].division=division
@@ -417,6 +436,16 @@ function Granchild:get_visual()
     end
   end
 
+  -- show tape recording
+  for i=1,self.num_voices do
+    local row = 8 
+    local col=4*(i-1)+4
+    if self.tape_voice == i then 
+      self.visual[row][col] = 15
+    else
+      self.visual[row][col] = 4
+    end
+  end
   return self.visual
 end
 
@@ -449,7 +478,9 @@ function Granchild:update_lfos()
   for i=1,self.num_voices do
     if params:get(i.."play")==2 then
       for j,m in ipairs(self.mod_vals[i]) do
-        params:set(m.name,util.clamp(util.linlin(-1,1,m.range[1],m.range[2],self:calculate_lfo(m.period,m.offset)),m.minmax[1],m.minmax[2]))
+        if params:get(m.name.."lfo") == 2 then 
+          params:set(i..m.name,util.clamp(util.linlin(-1,1,m.range[1],m.range[2],self:calculate_lfo(m.period,m.offset)),m.minmax[1],m.minmax[2]))
+        end
       end
     end
   end
@@ -463,5 +494,85 @@ function Granchild:calculate_lfo(period_in_beats,offset)
   end
 end
 
+function Granchild:rec_start(voice)
+  if self.tape_voice > 0 then 
+    -- only allow one at a time
+    self.rec_stop()
+  end
+  self.tape_voice = voice
+  self.tape_start = self:current_time()
+  audio.level_eng_cut(0)
+  audio.level_tape_cut(0)
+  --softcut.reset()
+  softcut.buffer_clear()
+  for i=1,2 do 
+    softcut.enable(i,1)
+    if i%2==1 then
+      softcut.pan(i,1)
+      softcut.buffer(i,1)
+      softcut.level_input_cut(1,i,1)
+      softcut.level_input_cut(2,i,0)
+    else
+      softcut.pan(i,-1)
+      softcut.buffer(i,2)
+      softcut.level_input_cut(1,i,0)
+      softcut.level_input_cut(2,i,1)
+    end
+    softcut.level_slew_time(i,0.05)
+    softcut.rate_slew_time(i,0.05)
+    softcut.level(i,0)
+    softcut.rec(i,1)
+    softcut.play(i,1)
+    softcut.rate(i,1)
+    softcut.position(i,0)
+    softcut.loop_start(i,0)
+    softcut.loop_end(i,121)
+    softcut.rec_level(i,1.0)
+    softcut.pre_level(i,1.0)
+    softcut.post_filter_dry(i,0.0)
+    softcut.post_filter_lp(i,1.0)
+    softcut.post_filter_rq(i,1.0)
+    softcut.post_filter_fc(i,18000)
+    
+    softcut.pre_filter_dry(i,1.0)
+    softcut.pre_filter_lp(i,1.0)
+    softcut.pre_filter_rq(i,1.0)
+    softcut.pre_filter_fc(i,18000)
+  end
+end
+
+function Granchild:rec_stop()
+  for i=1,2 do 
+    softcut.rec(i,0)
+    softcut.play(i,0)
+  end
+  local tape_name = self:tape_get_name()
+  if tape_name ~= nil then 
+    softcut.buffer_write_stereo(tape_name,0.25,self:current_time()-self.tape_start)
+  end
+  -- TODO load the tape into the current voice!
+  print("saved to '"..tape_name.."'")
+  local voice = self.tape_voice
+  clock.run(function()
+    clock.sleep(1)
+    print("loading!")
+    params:set(voice.."sample",tape_name)
+  end)
+  self.tape_voice = 0 
+end
+
+function Granchild:tape_get_name()
+  if not util.file_exists(_path.audio.."granchild/") then 
+    os.execute("mkdir -p ".._path.audio.."granchild/")
+  end
+  for index=1,1000 do
+    index = string.format("%04d",index)
+    local filename = _path.audio.."granchild/"..index..".wav"
+    if not util.file_exists(filename) then 
+      do return _path.audio.."granchild/"..index..".wav" end
+    end
+  end
+  return nil
+end
 
 return Granchild
