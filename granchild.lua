@@ -3,7 +3,8 @@
 --
 -- llllllll.co/t/granchild
 --
---
+-- thx @artfwo, @cfdrake, 
+-- @justmat
 --
 
 engine.name="ZGlut"
@@ -52,7 +53,7 @@ local function setup_params()
     params:add_control(i.."q","filter q",controlspec.new(0.00,1.00,"lin",0.01,1))
     params:set_action(i.."q",function(value) engine.q(i,value) end)
 
-    params:add_control(i.."send","delay send",controlspec.new(0.0,1.0,"lin",0.01,.2))
+    params:add_control(i.."send","delay send",controlspec.new(0.0,1.0,"lin",0.01,0))
     params:set_action(i.."send",function(value) engine.send(i,value) end)
 
     params:add_control(i.."speed","speed",controlspec.new(-2.0,2.0,"lin",0.05,0,"",0.05/4))
@@ -141,9 +142,9 @@ function init()
     end
   end) -- start the grid redraw clock
 
-  params:set("1sample",_path.audio.."tape/0034.wav")
-  params:set("2sample",_path.audio.."tape/0035.wav")
-  params:set("3sample",_path.audio.."tape/0036.wav")
+  -- params:set("1sample",_path.audio.."tape/0034.wav")
+  -- params:set("2sample",_path.audio.."tape/0035.wav")
+  -- params:set("3sample",_path.audio.."tape/0036.wav")
   -- params:set("1sample",_path.audio.."splices/rach1.wav")
   -- params:set("1play",2)
   -- params:set("2sample",_path.audio.."tehn/whirl1.aif")

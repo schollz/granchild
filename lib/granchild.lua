@@ -1,4 +1,4 @@
-local lattice=include("kolor/lib/lattice")
+local lattice=include("lib/lattice")
 
 local Granchild={}
 
