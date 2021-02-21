@@ -78,6 +78,15 @@ local function setup_params()
 
 end
 
+params:add_group("lfos",6)
+params:add_option("jitterlfo","jitter",{"off","on"},2)
+params:add_option("spreadlfo","spread",{"off","on"},2)
+params:add_option("volumelfo","volume",{"off","on"},1)
+params:add_option("speedlfo","speed",{"off","on"},1)
+params:add_option("densitylfo","density",{"off","on"},1)
+params:add_option("sizelfo","size",{"off","on"},1)
+
+
 params:add_group("delay",8)
 -- effect controls
 -- delay time
@@ -142,17 +151,13 @@ function init()
     end
   end) -- start the grid redraw clock
 
-  -- params:set("1sample",_path.audio.."tape/0034.wav")
-  -- params:set("2sample",_path.audio.."tape/0035.wav")
-  -- params:set("3sample",_path.audio.."tape/0036.wav")
-  -- params:set("1sample",_path.audio.."splices/rach1.wav")
-  -- params:set("1play",2)
-  -- params:set("2sample",_path.audio.."tehn/whirl1.aif")
-  -- params:set("2play",2)
-  -- params:set("2pitch",12)
-  -- params:set("3sample",_path.audio.."tehn/drumev.wav")
-  -- params:set("3density",4)
-  -- params:set("3size",7)
+  --params:set("1cutoff",3000)
+  --params:set("2cutoff",3000)
+  --params:set("3cutoff",3000)
+  -- params:set("volumelfo",2)
+  --params:set("sizelfo",2)
+  --params:set("densitylfo",2)
+  --params:set("speedlfo",2)
 end
 
 
