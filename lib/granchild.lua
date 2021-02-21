@@ -1,5 +1,4 @@
-local lattice=include("lib/lattice")
-
+local lattice=require("lattice")
 local Granchild={}
 
 local pitch_mods={-12,-7,-5,0,5,7,12}
