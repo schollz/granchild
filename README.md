@@ -22,7 +22,8 @@ there are a lot of granulation scripts based on glut now, here's what's differen
 
 here's how the buttons are laid out. use e2 and e3 on the norns to move around and k2/k3 to toggle things. the grid just mirrors the norns screen, so this script works just fine without a grid.
 
-![granchild_grid-01](https://user-images.githubusercontent.com/6550035/108614216-bbaac700-73ad-11eb-9519-e109ff2137cd.jpg)
+![granchild_grid-01](https://user-images.githubusercontent.com/6550035/108614271-f6146400-73ad-11eb-99e8-6bddeae8f892.jpg)
+
 
 ### Install
 
