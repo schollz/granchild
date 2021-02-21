@@ -27,7 +27,7 @@ for reference in that demo video above - here are the four samples used. first t
 
 here's how the buttons are laid out. use e2 and e3 on the norns to move around and k2/k3 to toggle things. the grid just mirrors the norns screen, so this script works just fine without a grid.
 
-![granchild_grid-01](https://user-images.githubusercontent.com/6550035/108614271-f6146400-73ad-11eb-99e8-6bddeae8f892.jpg)
+![granchild_grid-01](https://user-images.githubusercontent.com/6550035/108640397-40e5b880-744e-11eb-93da-83bda151e44d.jpg)
 
 you may see that one button that does nothing - that one is open to interpretation ;)
 
