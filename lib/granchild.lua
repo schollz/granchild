@@ -1,4 +1,6 @@
+local json=include("granchild/lib/json")
 local lattice=require("lattice")
+
 local Granchild={}
 
 local pitch_mods={-12,-7,-5,0,5,7,12}
@@ -49,8 +51,8 @@ function Granchild:new(args)
   m.num_voices=4
 
   -- recording to tape
-  m.tape_voice = 0 
-  m.tape_start = 0
+  m.tape_voice=0
+  m.tape_start=0
 
 
   -- setup step sequencer
@@ -238,6 +240,14 @@ function Granchild:key_press(row,col,on)
   end
 end
 
+function Granchild:set_steps(voice,steps_string)
+  if steps_string~="" then
+    local steps=json.decode(steps_string)
+    if steps~=nil then
+      self.voices[voice].steps=steps
+    end
+  end
+end
 
 function Granchild:toggle_recording(col)
   local voice=math.floor((col-1)/4)+1
@@ -247,6 +257,9 @@ function Granchild:toggle_recording(col)
     self.voices[voice].step=0
     self.voices[voice].step_val=0
     self.voices[voice].is_playing=false
+  else
+    -- save steps (silently as to not trigger)
+    params:set(voice.."pattern",json.encode(self.voices[voice].steps),true)
   end
 end
 
@@ -261,10 +274,10 @@ end
 
 function Granchild:toggle_tape_rec(col)
   local voice=math.floor((col-1)/4)+1
-  if self.tape_voice == voice then 
+  if self.tape_voice==voice then
     self:rec_stop()
   else
-    self:rec_start(voice)    
+    self:rec_start(voice)
   end
 end
 
@@ -438,12 +451,12 @@ function Granchild:get_visual()
 
   -- show tape recording
   for i=1,self.num_voices do
-    local row = 8 
+    local row=8
     local col=4*(i-1)+4
-    if self.tape_voice == i then 
-      self.visual[row][col] = 15
+    if self.tape_voice==i then
+      self.visual[row][col]=15
     else
-      self.visual[row][col] = 4
+      self.visual[row][col]=4
     end
   end
   return self.visual
@@ -478,7 +491,7 @@ function Granchild:update_lfos()
   for i=1,self.num_voices do
     if params:get(i.."play")==2 then
       for j,m in ipairs(self.mod_vals[i]) do
-        if params:get(m.name.."lfo") == 2 then 
+        if params:get(m.name.."lfo")==2 then
           params:set(i..m.name,util.clamp(util.linlin(-1,1,m.range[1],m.range[2],self:calculate_lfo(m.period,m.offset)),m.minmax[1],m.minmax[2]))
         end
       end
@@ -495,17 +508,17 @@ function Granchild:calculate_lfo(period_in_beats,offset)
 end
 
 function Granchild:rec_start(voice)
-  if self.tape_voice > 0 then 
+  if self.tape_voice>0 then
     -- only allow one at a time
     self.rec_stop()
   end
-  self.tape_voice = voice
-  self.tape_start = self:current_time()
+  self.tape_voice=voice
+  self.tape_start=self:current_time()
   audio.level_eng_cut(0)
   audio.level_tape_cut(0)
   --softcut.reset()
   softcut.buffer_clear()
-  for i=1,2 do 
+  for i=1,2 do
     softcut.enable(i,1)
     if i%2==1 then
       softcut.pan(i,1)
@@ -533,7 +546,7 @@ function Granchild:rec_start(voice)
     softcut.post_filter_lp(i,1.0)
     softcut.post_filter_rq(i,1.0)
     softcut.post_filter_fc(i,18000)
-    
+
     softcut.pre_filter_dry(i,1.0)
     softcut.pre_filter_lp(i,1.0)
     softcut.pre_filter_rq(i,1.0)
@@ -542,33 +555,33 @@ function Granchild:rec_start(voice)
 end
 
 function Granchild:rec_stop()
-  for i=1,2 do 
+  for i=1,2 do
     softcut.rec(i,0)
     softcut.play(i,0)
   end
-  local tape_name = self:tape_get_name()
-  if tape_name ~= nil then 
+  local tape_name=self:tape_get_name()
+  if tape_name~=nil then
     softcut.buffer_write_stereo(tape_name,0.25,self:current_time()-self.tape_start)
   end
   -- TODO load the tape into the current voice!
   print("saved to '"..tape_name.."'")
-  local voice = self.tape_voice
+  local voice=self.tape_voice
   clock.run(function()
     clock.sleep(1)
     print("loading!")
     params:set(voice.."sample",tape_name)
   end)
-  self.tape_voice = 0 
+  self.tape_voice=0
 end
 
 function Granchild:tape_get_name()
-  if not util.file_exists(_path.audio.."granchild/") then 
+  if not util.file_exists(_path.audio.."granchild/") then
     os.execute("mkdir -p ".._path.audio.."granchild/")
   end
   for index=1,1000 do
-    index = string.format("%04d",index)
-    local filename = _path.audio.."granchild/"..index..".wav"
-    if not util.file_exists(filename) then 
+    index=string.format("%04d",index)
+    local filename=_path.audio.."granchild/"..index..".wav"
+    if not util.file_exists(filename) then
       do return _path.audio.."granchild/"..index..".wav" end
     end
   end

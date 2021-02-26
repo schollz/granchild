@@ -76,6 +76,9 @@ local function setup_params()
   params:add_taper(i.."spread","spread",0,100,0,0,"%")
   params:set_action(i.."spread",function(value) engine.spread(i,value/100) end)
 
+  params:add_text(i.."pattern","pattern","")
+  params:hide(i.."pattern")
+  params:set_action(i.."pattern",function(value) if granchild_grid ~= nil then granchild_grid:set_steps(i,value) end end)
 end
 
 params:add_group("lfos",6)
