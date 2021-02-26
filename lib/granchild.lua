@@ -267,6 +267,7 @@ function Granchild:toggle_playing(col)
   local voice=math.floor((col-1)/4)+1
   self.voices[voice].is_playing=not self.voices[voice].is_playing
   if self.voices[voice].is_playing then
+    params:set(voice.."pattern",json.encode(self.voices[voice].steps),true)
     self.voices[voice].is_recording=false
     self.voices[voice].step_val=0
   end
