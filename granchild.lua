@@ -25,8 +25,11 @@ local function setup_params()
     params:add_group("sample "..i,16)
     params:add_file(i.."sample","sample")
     params:set_action(i.."sample",function(file)
-      engine.read(i,file)
-      params:set(i.."play",2)
+      print("sample "..file)
+      if file~="-" then
+        engine.read(i,file)
+        params:set(i.."play",2)
+      end
     end)
 
     params:add_option(i.."play","play",{"off","on"},1)
