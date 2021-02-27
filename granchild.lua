@@ -21,6 +21,7 @@ local division_names={"2 wn","wn","hn","hn-t","qn","qn-t","eighth"}
 local function setup_params()
   params:add_separator("samples")
   local num_voices=4
+  local old_volume={0.25,0.25,0.25,0.25}
   for i=1,num_voices do
     params:add_group("sample "..i,16)
     params:add_file(i.."sample","sample")
@@ -39,7 +40,16 @@ local function setup_params()
     params:set_action(i.."seek",function(value) engine.seek(i,util.clamp(value+params:get(i.."pos"),0,1)) end)
 
     params:add_control(i.."volume","volume",controlspec.new(0,1.0,"lin",0.05,0.25,"vol",0.05/1))
-    params:set_action(i.."volume",function(value) engine.volume(i,value) end)
+    params:set_action(i.."volume",function(value) 
+      engine.volume(i,value) 
+      -- turn off the delay if volume is zero
+      if value == 0 then
+        engine.send(i,0)
+      elseif value > 0 and old_volume[i]==0 then 
+        engine.send(i,params:get(i.."send"))
+      end
+      old_volume[i]=value
+    end)
 
     params:add_control(i.."density","density",controlspec.new(1,40,"lin",1,12,"/beat",1/40))
     params:set_action(i.."density",function(value) engine.density(i,value/(4*clock.get_beat_sec())) end)
@@ -56,7 +66,7 @@ local function setup_params()
     params:add_control(i.."q","filter q",controlspec.new(0.00,1.00,"lin",0.01,1))
     params:set_action(i.."q",function(value) engine.q(i,value) end)
 
-    params:add_control(i.."send","delay send",controlspec.new(0.0,1.0,"lin",0.01,0))
+    params:add_control(i.."send","delay send",controlspec.new(0.0,1.0,"lin",0.01,0.2))
     params:set_action(i.."send",function(value) engine.send(i,value) end)
 
     params:add_control(i.."speed","speed",controlspec.new(-2.0,2.0,"lin",0.05,0,"",0.05/4))
