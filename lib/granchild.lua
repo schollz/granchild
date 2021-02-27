@@ -3,8 +3,8 @@ local lattice=require("lattice")
 
 local Granchild={}
 
-local pitch_mods={-12,-7,-5,0,5,7,12}
-local num_steps = 21
+local pitch_mods={-12,-7,-5,-3,0,3,5,7,12}
+local num_steps = 18
 
 function Granchild:new(args)
   local m=setmetatable({},{__index=Granchild})
@@ -65,7 +65,7 @@ function Granchild:new(args)
       steps={},
       step=0,
       step_val=0,
-      pitch_mod_i=4,
+      pitch_mod_i=5,
     }
   end
 
@@ -220,9 +220,11 @@ function Granchild:key_press(row,col,on)
     end
   end
 
-  if (col%4==2 or col%4==3 or col%4==0) and row<8 and on then
+  if (col%4==2 or col%4==3 or col%4==0) and row<7 and on then
     -- change position
     self:change_position(row,col)
+  elseif (col%4==2 or col%4==3) and row==7 and on then
+    self:change_pitch_mod(row,col)
   elseif col%4==1 and (row==1 or row==2) and on then
     self:change_density_mod(row,col)
   elseif col%4==1 and (row==3 or row==4) and on then
@@ -316,7 +318,8 @@ end
 
 function Granchild:change_pitch_mod(row,col)
   local voice =  math.floor((col-1)/4)+1
-  local diff = -1 * ((row-3)*2-1)
+  col = col%4
+  local diff = -1*((3-col)*2-1)
   self.voices[voice].pitch_mod_i = self.voices[voice].pitch_mod_i + diff
   self.voices[voice].pitch_mod_i = util.clamp(self.voices[voice].pitch_mod_i,1,#pitch_mods)
   print(self.voices[voice].pitch_mod_i)
