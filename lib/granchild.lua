@@ -4,7 +4,7 @@ local lattice=require("lattice")
 local Granchild={}
 
 local pitch_mods={-12,-7,-5,0,5,7,12}
-
+local num_steps = 21
 
 function Granchild:new(args)
   local m=setmetatable({},{__index=Granchild})
@@ -161,7 +161,7 @@ function Granchild:emit_note(division)
       end
       local step_val=self.voices[i].steps[self.voices[i].step]
       if step_val~=self.voices[i].step_val and step_val~=nil then
-        params:set(i.."seek",util.linlin(1,21,0,1,step_val)+(math.random()-0.5)/100)
+        params:set(i.."seek",util.linlin(1,num_steps,0,1,step_val)+(math.random()-0.5)/100)
       end
       self.voices[i].step_val=step_val
       update=true
@@ -314,15 +314,15 @@ function Granchild:change_volume(row,col)
   print("change_volume "..voice.." "..diff.." "..params:get(voice.."volume"))
 end
 
--- function Granchild:change_pitch_mod(row,col)
---   local voice =  math.floor((col-1)/4)+1
---   local diff = -1 * ((row-3)*2-1)
---   self.voices[voice].pitch_mod_i = self.voices[voice].pitch_mod_i + diff
---   self.voices[voice].pitch_mod_i = util.clamp(self.voices[voice].pitch_mod_i,1,#pitch_mods)
---   print(self.voices[voice].pitch_mod_i)
---   params:set(voice.."pitch",pitch_mods[self.voices[voice].pitch_mod_i])
---   print("change_pitch_mod "..voice.." "..diff.." "..params:get(voice.."pitch"))
--- end
+function Granchild:change_pitch_mod(row,col)
+  local voice =  math.floor((col-1)/4)+1
+  local diff = -1 * ((row-3)*2-1)
+  self.voices[voice].pitch_mod_i = self.voices[voice].pitch_mod_i + diff
+  self.voices[voice].pitch_mod_i = util.clamp(self.voices[voice].pitch_mod_i,1,#pitch_mods)
+  print(self.voices[voice].pitch_mod_i)
+  params:set(voice.."pitch",pitch_mods[self.voices[voice].pitch_mod_i])
+  print("change_pitch_mod "..voice.." "..diff.." "..params:get(voice.."pitch"))
+end
 
 function Granchild:change_position(row,col)
   local voice=math.floor((col-2)/4)+1
@@ -332,7 +332,7 @@ function Granchild:change_position(row,col)
     table.insert(self.voices[voice].steps,val)
   end
   print("change_position "..voice..": "..val)
-  params:set(voice.."seek",util.linlin(1,21,0,1,val)+(math.random()-0.5)/100)
+  params:set(voice.."seek",util.linlin(1,num_steps,0,1,val)+(math.random()-0.5)/100)
 end
 
 
@@ -422,7 +422,7 @@ function Granchild:get_visual()
       end
       if step>0 then
         for j=1,step do
-          local row,col=self:pos_to_row_col((j-1)%21+1)
+          local row,col=self:pos_to_row_col((j-1)%num_steps+1)
           col=col+4*(i-1)
           self.visual[row][col]=self.visual[row][col]+3
           if self.visual[row][col]>15 then
@@ -436,11 +436,11 @@ function Granchild:get_visual()
   -- show current position
   for i=1,self.num_voices do
     if self.voices[i].position~=nil then
-      local pos=util.linlin(0,1,1,21,self.voices[i].position)
+      local pos=util.linlin(0,1,1,num_steps,self.voices[i].position)
       local pos1=math.floor(pos)
       local diff=pos-pos1
       local pos2=pos1+1
-      if pos2>21 then
+      if pos2>num_steps then
         pos2=1
       end
       local row1,col1=self:pos_to_row_col(pos1)

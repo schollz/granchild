@@ -167,6 +167,8 @@ function init()
     end
   end) -- start the grid redraw clock
 
+  params:set("1sample",_path.audio.."splices/glass1.wav")
+  params:set("2sample",_path.audio.."splices/glass2.wav")
   --params:set("1cutoff",3000)
   --params:set("2cutoff",3000)
   --params:set("3cutoff",3000)
