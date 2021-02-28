@@ -16,14 +16,28 @@ local press_positions={{0,0},{0,0}}
 local norns_screen={}
 local divisions={1,2,4,6,8,12,16}
 local division_names={"2 wn","wn","hn","hn-t","qn","qn-t","eighth"}
+local param_list={"spread","jitter","size","pos","q","division","speed","send","q","cutoff","fade","pitch","density","volume","seek","play","sample"}
+local param_list_2={"sizelfo","densitylfo","speedlfo","volumelfo","spreadlfo","jitterlfo","delay_volume","delay_mod_freq","delay_mod_depth","delay_fdbk","delay_diff","delay_damp","delay_size","delay_time"}
 
 local function setup_params()
   params:add_option("scene","scene",{"a","b"},1)
-   params:add_separator("samples")
+  params:set_action("scene",function(scene)
+    for i=1,4 do
+      for _,param_name in ipairs(param_list) do
+        params:hide(i..param_name..(3-scene))
+        params:show(i..param_name..scene)
+      end
+    end
+    for _,param_name in ipairs(param_list_2) do
+       params:hide(param_name..(3-scene))
+      params:show(param_name..scene)
+    end
+  end)
+  params:add_separator("samples")
   local num_voices=4
   local old_volume={0.25,0.25,0.25,0.25}
   for i=1,num_voices do
-    params:add_group("sample "..i,32)
+    params:add_group("sample "..i,34)
     for scene=1,2 do
       params:add_file(i.."sample"..scene,"sample")
       params:set_action(i.."sample"..scene,function(file)
@@ -39,9 +53,6 @@ local function setup_params()
 
       params:add_control(i.."seek"..scene,"seek",controlspec.new(0,1,"lin",0.001,0,"",0.001/1))
       params:set_action(i.."seek"..scene,function(value) engine.seek(i,util.clamp(value+params:get(i.."pos"..scene),0,1)) end)
-      if hidden then
-        params:hide(i.."seek"..scene)
-      end
 
       params:add_control(i.."volume"..scene,"volume",controlspec.new(0,1.0,"lin",0.05,0.25,"vol",0.05/1))
       params:set_action(i.."volume"..scene,function(value)
@@ -67,7 +78,7 @@ local function setup_params()
       params:add_control(i.."cutoff"..scene,"filter cutoff",controlspec.new(20,20000,"exp",0,20000,"hz"))
       params:set_action(i.."cutoff"..scene,function(value) engine.cutoff(i,value) end)
 
-      params:add_control(i.."q"..scene,"filter q"..scene,controlspec.new(0.00,1.00,"lin",0.01,1))
+      params:add_control(i.."q"..scene,"filter q",controlspec.new(0.00,1.00,"lin",0.01,1))
       params:set_action(i.."q"..scene,function(value) engine.q(i,value) end)
 
       params:add_control(i.."send"..scene,"delay send",controlspec.new(0.0,1.0,"lin",0.01,0.2))
@@ -110,51 +121,50 @@ local function setup_params()
 
   params:add_group("lfos",12)
   for scene=1,2 do
-  params:add_option("jitterlfo"..scene,"jitter",{"off","on"},2)
-  params:add_option("spreadlfo"..scene,"spread",{"off","on"},2)
-  params:add_option("volumelfo"..scene,"volume",{"off","on"},1)
-  params:add_option("speedlfo"..scene,"speed",{"off","on"},1)
-  params:add_option("densitylfo"..scene,"density",{"off","on"},1)
-  params:add_option("sizelfo"..scene,"size",{"off","on"},1)
-end
+    params:add_option("jitterlfo"..scene,"jitter",{"off","on"},2)
+    params:add_option("spreadlfo"..scene,"spread",{"off","on"},2)
+    params:add_option("volumelfo"..scene,"volume",{"off","on"},1)
+    params:add_option("speedlfo"..scene,"speed",{"off","on"},1)
+    params:add_option("densitylfo"..scene,"density",{"off","on"},1)
+    params:add_option("sizelfo"..scene,"size",{"off","on"},1)
+  end
 
   params:add_group("delay",16)
   for scene=1,2 do
-  -- effect controls
-  -- delay time
-  params:add_control("delay_time"..scene,"*".."delay time",controlspec.new(0.0,60.0,"lin",.01,2.00,""))
-  params:set_action("delay_time"..scene,function(value) engine.delay_time(value) end)
-  -- delay size
-  params:add_control("delay_size"..scene,"*".."delay size",controlspec.new(0.5,5.0,"lin",0.01,2.00,""))
-  params:set_action("delay_size"..scene,function(value) engine.delay_size(value) end)
-  -- dampening
-  params:add_control("delay_damp"..scene,"*".."delay damp",controlspec.new(0.0,1.0,"lin",0.01,0.10,""))
-  params:set_action("delay_damp"..scene,function(value) engine.delay_damp(value) end)
-  -- diffusion
-  params:add_control("delay_diff"..scene,"*".."delay diff",controlspec.new(0.0,1.0,"lin",0.01,0.707,""))
-  params:set_action("delay_diff"..scene,function(value) engine.delay_diff(value) end)
-  -- feedback
-  params:add_control("delay_fdbk"..scene,"*".."delay fdbk",controlspec.new(0.00,1.0,"lin",0.01,0.20,""))
-  params:set_action("delay_fdbk"..scene,function(value) engine.delay_fdbk(value) end)
-  -- mod depth
-  params:add_control("delay_mod_depth"..scene,"*".."delay mod depth",controlspec.new(0.0,1.0,"lin",0.01,0.00,""))
-  params:set_action("delay_mod_depth"..scene,function(value) engine.delay_mod_depth(value) end)
-  -- mod rate
-  params:add_control("delay_mod_freq"..scene,"*".."delay mod freq",controlspec.new(0.0,10.0,"lin",0.01,0.10,"hz"))
-  params:set_action("delay_mod_freq"..scene,function(value) engine.delay_mod_freq(value) end)
-  -- delay output volume
-  params:add_control("delay_volume"..scene,"*".."delay output volume",controlspec.new(0.0,1.0,"lin",0,1.0,""))
-  params:set_action("delay_volume"..scene,function(value) engine.delay_volume(value) end)
-end
+    -- effect controls
+    -- delay time
+    params:add_control("delay_time"..scene,"*".."delay time",controlspec.new(0.0,60.0,"lin",.01,2.00,""))
+    params:set_action("delay_time"..scene,function(value) engine.delay_time(value) end)
+    -- delay size
+    params:add_control("delay_size"..scene,"*".."delay size",controlspec.new(0.5,5.0,"lin",0.01,2.00,""))
+    params:set_action("delay_size"..scene,function(value) engine.delay_size(value) end)
+    -- dampening
+    params:add_control("delay_damp"..scene,"*".."delay damp",controlspec.new(0.0,1.0,"lin",0.01,0.10,""))
+    params:set_action("delay_damp"..scene,function(value) engine.delay_damp(value) end)
+    -- diffusion
+    params:add_control("delay_diff"..scene,"*".."delay diff",controlspec.new(0.0,1.0,"lin",0.01,0.707,""))
+    params:set_action("delay_diff"..scene,function(value) engine.delay_diff(value) end)
+    -- feedback
+    params:add_control("delay_fdbk"..scene,"*".."delay fdbk",controlspec.new(0.00,1.0,"lin",0.01,0.20,""))
+    params:set_action("delay_fdbk"..scene,function(value) engine.delay_fdbk(value) end)
+    -- mod depth
+    params:add_control("delay_mod_depth"..scene,"*".."delay mod depth",controlspec.new(0.0,1.0,"lin",0.01,0.00,""))
+    params:set_action("delay_mod_depth"..scene,function(value) engine.delay_mod_depth(value) end)
+    -- mod rate
+    params:add_control("delay_mod_freq"..scene,"*".."delay mod freq",controlspec.new(0.0,10.0,"lin",0.01,0.10,"hz"))
+    params:set_action("delay_mod_freq"..scene,function(value) engine.delay_mod_freq(value) end)
+    -- delay output volume
+    params:add_control("delay_volume"..scene,"*".."delay output volume",controlspec.new(0.0,1.0,"lin",0,1.0,""))
+    params:set_action("delay_volume"..scene,function(value) engine.delay_volume(value) end)
+  end
 
-  param_list={"pattern","spread","jitter","size","pos","division","speed","send","q","cutoff","fade","pitch","density","volume","seek","play","sample"}
-  for i=1,4 do 
-    for _, param_name in ipairs(param_list) do
+  -- hide scene 2 initially
+  for i=1,4 do
+    for _,param_name in ipairs(param_list) do
       params:hide(i..param_name.."2")
     end
   end
-  param_list={"sizelfo","densitylfo","speedlfo","volumelfo","spreadlfo","jitterlfo","delay_volume","delay_mod_freq","delay_mod_depth","delay_fdbk","delay_diff","delay_damp","delay_size","delay_time"}
-  for _, param_name in ipairs(param_list) do
+  for _,param_name in ipairs(param_list_2) do
     params:hide(param_name.."2")
   end
 
@@ -234,8 +244,6 @@ function key(k,z)
     granchild_grid:key_press(press_positions[k-1][1],press_positions[k-1][2],z==1)
   end
 end
-
-
 
 
 function redraw()
