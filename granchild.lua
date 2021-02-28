@@ -48,7 +48,14 @@ local function setup_params()
           local p = params:lookup_param(i..param_name..scene)
           p:bang()
         end
-        _menu.m.PARAMS.rebuild_sub()
+        local p = params:lookup_param(i.."pattern"..scene)
+        p:bang()
+        if params:get(i.."pattern"..scene) == "" or params:get(i.."pattern"..scene) == "[]" then 
+          granchild_grid:toggle_playing_voice(i,false)
+        end
+        if _menu.m.PARAMS.rebuild_sub ~= nil then
+          _menu.m.PARAMS.rebuild_sub()
+        end
     end)
     for scene=1,2 do
       params:add_file(i.."sample"..scene,"sample")

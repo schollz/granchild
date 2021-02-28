@@ -253,6 +253,8 @@ function Granchild:set_steps(voice,steps_string)
     local steps=json.decode(steps_string)
     if steps~=nil then
       self.voices[voice].steps=steps
+    else
+      self.voices[voice].steps = {}
     end
   end
 end
@@ -271,14 +273,22 @@ function Granchild:toggle_recording(col)
   end
 end
 
-function Granchild:toggle_playing(col)
-  local voice=math.floor((col-1)/4)+1
-  self.voices[voice].is_playing=not self.voices[voice].is_playing
+function Granchild:toggle_playing_voice(voice,on)
+  if on == nil then
+    self.voices[voice].is_playing=not self.voices[voice].is_playing
+  else
+    self.voices[voice].is_playing=on
+  end    
   if self.voices[voice].is_playing then
     params:set(voice.."pattern"..params:get(voice.."scene"),json.encode(self.voices[voice].steps),true)
     self.voices[voice].is_recording=false
     self.voices[voice].step_val=0
   end
+end
+
+function Granchild:toggle_playing(col)
+  local voice=math.floor((col-1)/4)+1
+  self:toggle_playing_voice(voice)
 end
 
 function Granchild:toggle_tape_rec(col)
