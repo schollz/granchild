@@ -29,7 +29,7 @@ local function setup_params()
       end
     end
     for _,param_name in ipairs(param_list_2) do
-       params:hide(param_name..(3-scene))
+      params:hide(param_name..(3-scene))
       params:show(param_name..scene)
     end
   end)
