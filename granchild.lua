@@ -16,8 +16,8 @@ local press_positions={{0,0},{0,0}}
 local norns_screen={}
 local divisions={1,2,4,6,8,12,16}
 local division_names={"2 wn","wn","hn","hn-t","qn","qn-t","eighth"}
-local param_list={"spread","jitter","size","pos","q","division","speed","send","q","cutoff","fade","pitch","density","volume","seek","play","sample"}
-local param_list_2={"sizelfo","densitylfo","speedlfo","volumelfo","spreadlfo","jitterlfo","delay_volume","delay_mod_freq","delay_mod_depth","delay_fdbk","delay_diff","delay_damp","delay_size","delay_time"}
+local param_list={"sizelfo","densitylfo","speedlfo","volumelfo","spreadlfo","jitterlfo","spread","jitter","size","pos","q","division","speed","send","q","cutoff","fade","pitch","density","volume","seek","play","sample"}
+local param_list_delay={"delay_volume","delay_mod_freq","delay_mod_depth","delay_fdbk","delay_diff","delay_damp","delay_size","delay_time"}
 
 local function bang(scene)
   for i=1,4 do
@@ -28,32 +28,28 @@ local function bang(scene)
     local p = params:lookup_param(i.."pattern"..scene)
     p:bang()
   end
-  for _,param_name in ipairs(param_list_2) do
+  for _,param_name in ipairs(param_list_delay) do
     local p = params:lookup_param(param_name..scene)
     p:bang()
   end
 end
 
 local function setup_params()
-  params:add_option("scene","scene",{"a","b"},1)
-  params:set_action("scene",function(scene)
-    for i=1,4 do
-      for _,param_name in ipairs(param_list) do
-        params:hide(i..param_name..(3-scene))
-        params:show(i..param_name..scene)
-      end
-    end
-    for _,param_name in ipairs(param_list_2) do
-      params:hide(param_name..(3-scene))
-      params:show(param_name..scene)
-    end
-    bang(scene)
-  end)
   params:add_separator("samples")
   local num_voices=4
   local old_volume={0.25,0.25,0.25,0.25}
   for i=1,num_voices do
-    params:add_group("sample "..i,34)
+    params:add_group("sample "..i,47)
+    params:add_option(i.."scene","scene",{"a","b"},1)
+    params:set_action(i.."scene",function(scene)
+        for _,param_name in ipairs(param_list) do
+          params:hide(i..param_name..(3-scene))
+          params:show(i..param_name..scene)
+          local p = params:lookup_param(i..param_name..scene)
+          p:bang()
+        end
+        _menu.redraw()
+    end)
     for scene=1,2 do
       params:add_file(i.."sample"..scene,"sample")
       params:set_action(i.."sample"..scene,function(file)
@@ -61,6 +57,11 @@ local function setup_params()
         if file~="-" then
           engine.read(i,file)
           params:set(i.."play"..scene,2)
+          if params:get(i.."sample"..(3-scene))=="-" then 
+            -- load for other scene by default
+            params:set(i.."sample"..(3-scene),file,true)
+            params:set(i.."play"..(3-scene),2,true)
+          end
         end
       end)
 
@@ -81,9 +82,11 @@ local function setup_params()
         end
         old_volume[i]=value
       end)
+      params:add_option(i.."volumelfo"..scene,"volume lfo",{"off","on"},1)
 
       params:add_control(i.."density"..scene,"density",controlspec.new(1,40,"lin",1,12,"/beat",1/40))
       params:set_action(i.."density"..scene,function(value) engine.density(i,value/(4*clock.get_beat_sec())) end)
+      params:add_option(i.."densitylfo"..scene,"density lfo",{"off","on"},1)
 
       params:add_control(i.."pitch"..scene,"pitch",controlspec.new(-48,48,"lin",1,0,"note",1/96))
       params:set_action(i.."pitch"..scene,function(value) engine.pitch(i,math.pow(0.5,-value/12)) end)
@@ -102,6 +105,7 @@ local function setup_params()
 
       params:add_control(i.."speed"..scene,"speed",controlspec.new(-2.0,2.0,"lin",0.1,0,"",0.1/4))
       params:set_action(i.."speed"..scene,function(value) engine.speed(i,value) end)
+      params:add_option(i.."speedlfo"..scene,"speed lfo",{"off","on"},1)
 
       params:add_option(i.."division"..scene,"division",division_names,5)
       params:set_action(i.."division"..scene,function(value)
@@ -115,14 +119,16 @@ local function setup_params()
 
       params:add_control(i.."size"..scene,"size",controlspec.new(1,15,"lin",1,5,"",1/15))
       params:set_action(i.."size"..scene,function(value) engine.size(i,value*clock.get_beat_sec()/10) end)
+      params:add_option(i.."sizelfo"..scene,"size lfo",{"off","on"},1)
 
-      -- these parameters oscillate
 
       params:add_taper(i.."jitter"..scene,"jitter",0,500,0,5,"ms")
       params:set_action(i.."jitter"..scene,function(value) engine.jitter(i,value/1000) end)
+      params:add_option(i.."jitterlfo"..scene,"jitter lfo",{"off","on"},2)
 
       params:add_taper(i.."spread"..scene,"spread",0,100,0,0,"%")
       params:set_action(i.."spread"..scene,function(value) engine.spread(i,value/100) end)
+      params:add_option(i.."spreadlfo"..scene,"spread lfo",{"off","on"},2)
 
       params:add_text(i.."pattern"..scene,"pattern","")
       params:hide(i.."pattern"..scene)
@@ -135,17 +141,17 @@ local function setup_params()
   end
 
 
-  params:add_group("lfos",12)
-  for scene=1,2 do
-    params:add_option("jitterlfo"..scene,"jitter",{"off","on"},2)
-    params:add_option("spreadlfo"..scene,"spread",{"off","on"},2)
-    params:add_option("volumelfo"..scene,"volume",{"off","on"},1)
-    params:add_option("speedlfo"..scene,"speed",{"off","on"},1)
-    params:add_option("densitylfo"..scene,"density",{"off","on"},1)
-    params:add_option("sizelfo"..scene,"size",{"off","on"},1)
-  end
 
-  params:add_group("delay",16)
+  params:add_group("delay",17)
+    params:add_option("delayscene","scene",{"a","b"},1)
+    params:set_action("delayscene",function(scene)
+        for _,param_name in ipairs(param_list_delay) do
+          params:hide(i..param_name..(3-scene))
+          params:show(i..param_name..scene)
+          local p = params:lookup_param(i..param_name..scene)
+          p:bang()
+        end
+    end)
   for scene=1,2 do
     -- effect controls
     -- delay time
@@ -180,7 +186,7 @@ local function setup_params()
       params:hide(i..param_name.."2")
     end
   end
-  for _,param_name in ipairs(param_list_2) do
+  for _,param_name in ipairs(param_list_delay) do
     params:hide(param_name.."2")
   end
 
