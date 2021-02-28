@@ -48,7 +48,7 @@ local function setup_params()
           local p = params:lookup_param(i..param_name..scene)
           p:bang()
         end
-        _menu.redraw()
+        _menu.m.PARAMS.rebuild_sub()
     end)
     for scene=1,2 do
       params:add_file(i.."sample"..scene,"sample")
