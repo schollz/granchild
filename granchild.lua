@@ -234,15 +234,10 @@ function init()
     end
   end) -- start the grid redraw clock
 
-  -- params:set("1sample",_path.audio.."splices/rach1.wav")
-  -- params:set("2sample",_path.audio.."splices/glass2.wav")
-  -- params:set("1cutoff",3000)
-  --params:set("2cutoff",3000)
-  --params:set("3cutoff",3000)
-  -- params:set("volumelfo",2)
-  --params:set("sizelfo",2)
-  --params:set("densitylfo",2)
-  --params:set("speedlfo",2)
+  -- params:set("1sample1",_path.audio.."splices/rach1.wav")
+  -- params:set("1sample1","/home/we/dust/audio/kolor/bank12/loop_break_bpm175.wav")
+  -- params:set("1cutoff1",3000)
+  -- params:set("1cutoff2",3000)
 end
 
 

@@ -61,6 +61,7 @@ Engine_ZGlut : CroneEngine {
 			cutoff = Lag.kr(cutoff);
 			q = Lag.kr(q);
 			send = Lag.kr(send);
+			pitch = Lag.kr(pitch,0.25);
 			
 			grain_trig = Impulse.kr(density);
 			buf_dur = BufDur.kr(buf);

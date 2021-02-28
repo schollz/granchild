@@ -73,7 +73,7 @@ function Granchild:new(args)
 
   -- setup lfos
   local mod_parameters={
-    {name="jitter",range={5,100},lfo={32,64}},
+    {name="jitter",range={15,200},lfo={32,64}},
     {name="spread",range={0,100},lfo={16,24}},
     {name="volume",range={0,0.25},lfo={16,24}},
     {name="speed",range={-0.05,0.05},lfo={16,24}},
