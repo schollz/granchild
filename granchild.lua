@@ -69,7 +69,7 @@ local function setup_params()
     params:add_control(i.."send","delay send",controlspec.new(0.0,1.0,"lin",0.01,0.2))
     params:set_action(i.."send",function(value) engine.send(i,value) end)
 
-    params:add_control(i.."speed","speed",controlspec.new(-2.0,2.0,"lin",0.05,0,"",0.05/4))
+    params:add_control(i.."speed","speed",controlspec.new(-2.0,2.0,"lin",0.1,0,"",0.1/4))
     params:set_action(i.."speed",function(value) engine.speed(i,value) end)
 
     params:add_option(i.."division","division",division_names,5)
