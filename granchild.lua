@@ -19,6 +19,19 @@ local division_names={"2 wn","wn","hn","hn-t","qn","qn-t","eighth"}
 local param_list={"spread","jitter","size","pos","q","division","speed","send","q","cutoff","fade","pitch","density","volume","seek","play","sample"}
 local param_list_2={"sizelfo","densitylfo","speedlfo","volumelfo","spreadlfo","jitterlfo","delay_volume","delay_mod_freq","delay_mod_depth","delay_fdbk","delay_diff","delay_damp","delay_size","delay_time"}
 
+local function bang(scene)
+  for i=1,4 do
+    for _,param_name in ipairs(param_list) do
+      local p = params:lookup_param(i..param_name..scene)
+      p:bang()
+    end
+  end
+  for _,param_name in ipairs(param_list_2) do
+    local p = params:lookup_param(param_name..scene)
+    p:bang()
+  end
+end
+
 local function setup_params()
   params:add_option("scene","scene",{"a","b"},1)
   params:set_action("scene",function(scene)
@@ -32,6 +45,7 @@ local function setup_params()
       params:hide(param_name..(3-scene))
       params:show(param_name..scene)
     end
+    bang(scene)
   end)
   params:add_separator("samples")
   local num_voices=4
@@ -168,7 +182,7 @@ local function setup_params()
     params:hide(param_name.."2")
   end
 
-  params:bang()
+  bang(1)
 end
 
 
