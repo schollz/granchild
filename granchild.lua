@@ -25,6 +25,8 @@ local function bang(scene)
       local p = params:lookup_param(i..param_name..scene)
       p:bang()
     end
+    local p = params:lookup_param(i.."pattern"..scene)
+    p:bang()
   end
   for _,param_name in ipairs(param_list_2) do
     local p = params:lookup_param(param_name..scene)

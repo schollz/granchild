@@ -227,6 +227,8 @@ function Granchild:key_press(row,col,on)
     self:change_position(row,col)
   elseif (col%4==2 or col%4==3) and row==7 and on then
     self:change_pitch_mod(row,col)
+  elseif (col%4==0) and row==7 and on then
+    self:change_scene(col)
   elseif col%4==1 and (row==1 or row==2) and on then
     self:change_density_mod(row,col)
   elseif col%4==1 and (row==3 or row==4) and on then
@@ -243,6 +245,8 @@ function Granchild:key_press(row,col,on)
     self:toggle_tape_rec(col)
   end
 end
+
+
 
 function Granchild:set_steps(voice,steps_string)
   if steps_string~="" then
@@ -327,6 +331,11 @@ function Granchild:change_pitch_mod(row,col)
   print(self.voices[voice].pitch_mod_i)
   params:set(voice.."pitch"..params:get("scene"),pitch_mods[self.voices[voice].pitch_mod_i])
   print("change_pitch_mod "..voice.." "..diff.." "..params:get(voice.."pitch"..params:get("scene")))
+end
+
+function Granchild:change_scene(col)
+  local voice =  math.floor((col-1)/4)+1
+  params:set("scene",3-params:get("scene"))
 end
 
 function Granchild:change_position(row,col)
@@ -416,6 +425,23 @@ function Granchild:get_visual()
     local col=4*(i-1)+1
     self.visual[7][col]=util.round(val)
     self.visual[8][col]=15-util.round(val)
+  end
+
+  -- show the pitch
+  for i=1,self.num_voices do
+    local val=util.linlin(-12,12,0,15,util.clamp(params:get(i.."pitch"..params:get("scene")),-12,12))
+    self.visual[7][4*(i-1)+2]=15-util.round(val)
+    self.visual[7][4*(i-1)+3]=util.round(val)
+  end
+
+  -- show the scene
+  for i=1,self.num_voices do
+    local val=params:get("scene")
+    if val == 1 then 
+      self.visual[7][4*(i-1)+4]=7
+    else
+      self.visual[7][4*(i-1)+4]=15
+    end
   end
 
   -- show current step
