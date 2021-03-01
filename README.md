@@ -32,6 +32,34 @@ here's how the buttons are laid out. use e2 and e3 on the norns to move around a
 
 _note:_ when you use the record button for live input, all recordings are automatically saved permanently in `~/dust/audio/granchild`.
 
+### Updates
+
+#### version 1.3.0 - scenes + stereo granulation
+
+- new feature: glut engine is further updated to allow stereo samples
+- new feature: subharmonic and overtone grains added
+- new feature: "scenes" added
+- ui: added "pitch" buttons to the main screen
+- ui: update 64-grid screen
+
+subharmonics and overtones are available to better manage the extreme high/low ends from grains. subharmonics initiate grains with half the speed, while overtones inititae grains with twice and four times the current speed.
+
+by default now you need to use stereo samples with granchild. the "spread" parameter affects stereo samples in the following way:
+
+- spread=0: the channels stay on their respective side
+- spread=0.5: the channels are randomly distributed on their respective side (i.e. left stays between -1 and 0)
+- spread=1: both channels are randomly distributed across the whole field
+
+
+#### version 1.2.1 - minor update
+
+- bug fix: keep samples off until loaded
+- bug fix: turn off send if volume set to 0
+
+
+
+
+
 
 ### Install
 
@@ -40,3 +68,4 @@ from maiden:
 ```
 ;install https://github.com/schollz/granchild
 ```
+
