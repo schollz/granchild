@@ -231,7 +231,7 @@ function Granchild:key_press(row,col,on)
   if (col%4==2 or col%4==3 or col%4==0) and row<7 and on then
     -- change position
     self:change_position(row,col)
-  elseif (col%4==2 or col%4==3) and row==7 and on then
+  elseif col%4==1 and (row==7 or row==8) and on then
     self:change_pitch_mod(row,col)
   elseif (col%4==0) and row==7 and on then
     self:change_scene(col)
@@ -243,11 +243,11 @@ function Granchild:key_press(row,col,on)
     self:change_speed(row,col)
   elseif col%4==1 and (row==7 or row==8) and on then
     self:change_volume(row,col)
-  elseif col%4==2 and row==8 and on then
-    self:toggle_recording(col)
   elseif col%4==3 and row==8 and on then
-    self:toggle_playing(col)
+    self:toggle_recording(col)
   elseif col%4==0 and row==8 and on then
+    self:toggle_playing(col)
+  elseif col%4==3 and row==7 and on then
     self:toggle_tape_rec(col)
   end
 end
@@ -340,8 +340,7 @@ end
 
 function Granchild:change_pitch_mod(row,col)
   local voice=math.floor((col-1)/4)+1
-  col=col%4
-  local diff=-1*((3-col)*2-1)
+  local diff=-1*((row-7)*2-1)
   self.voices[voice].pitch_mod_i=self.voices[voice].pitch_mod_i+diff
   self.voices[voice].pitch_mod_i=util.clamp(self.voices[voice].pitch_mod_i,1,#pitch_mods)
   print(self.voices[voice].pitch_mod_i)
@@ -394,7 +393,7 @@ function Granchild:get_visual()
   -- show stop/play button
   for i=1,self.num_voices do
     local row=8
-    local col=4*(i-1)+3
+    local col=4*(i-1)+4
     self.visual[row][col]=4
     if self.voices[i].is_playing then
       self.visual[row][col]=14
@@ -404,7 +403,7 @@ function Granchild:get_visual()
   -- show rec button
   for i=1,self.num_voices do
     local row=8
-    local col=4*(i-1)+2
+    local col=4*(i-1)+3
     self.visual[row][col]=4
     if self.voices[i].is_recording then
       self.visual[row][col]=14
@@ -446,8 +445,9 @@ function Granchild:get_visual()
   -- show the pitch
   for i=1,self.num_voices do
     local val=util.linlin(-12,12,0,15,util.clamp(params:get(i.."pitch"..params:get(i.."scene")),-12,12))
-    self.visual[7][4*(i-1)+2]=15-util.round(val)
-    self.visual[7][4*(i-1)+3]=util.round(val)
+    local col=4*(i-1)+2
+    self.visual[7][col]=util.round(val)
+    self.visual[8][col]=15-util.round(val)
   end
 
   -- show the scene
@@ -499,8 +499,8 @@ function Granchild:get_visual()
 
   -- show tape recording
   for i=1,self.num_voices do
-    local row=8
-    local col=4*(i-1)+4
+    local row=7
+    local col=4*(i-1)+3
     if self.tape_voice==i then
       self.visual[row][col]=15
     else
