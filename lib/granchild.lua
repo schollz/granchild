@@ -148,7 +148,6 @@ function Granchild:new(args)
     phase_poll:start()
   end
 
-
   return m
 end
 
@@ -622,7 +621,7 @@ function Granchild:rec_stop()
   if tape_name~=nil then
     softcut.buffer_write_stereo(tape_name,0.25,self:current_time()-self.tape_start)
   end
-  -- TODO load the tape into the current voice!
+  -- load the tape into the current voice
   print("saved to '"..tape_name.."'")
   local voice=self.tape_voice
   clock.run(function()
