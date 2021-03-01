@@ -272,6 +272,8 @@ function key(k,z)
       press_positions[k-1]={position[1],position[2]}
     end
     granchild_grid:key_press(press_positions[k-1][1],press_positions[k-1][2],z==1)
+  elseif k==1 and z==1 then 
+	  granchild_grid:toggle_grid64_side()
   end
 end
 

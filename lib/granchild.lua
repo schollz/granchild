@@ -173,6 +173,10 @@ function Granchild:emit_note(division)
   end
 end
 
+function Granchild:toggle_grid64_side()
+  self.grid64default=not self.grid64default
+end
+
 function Granchild:toggle_grid(on)
   if on==nil then
     self.grid_on=not self.grid_on
@@ -204,6 +208,9 @@ function Granchild:grid_key(x,y,z)
 end
 
 function Granchild:key_press(row,col,on)
+  if self.grid64 and not self.grid64default then
+    col=col+8
+  end
   if on then
     self.pressed_buttons[row..","..col]=self:current_time()
     if row==8 and col==2 and self.toggleable then
