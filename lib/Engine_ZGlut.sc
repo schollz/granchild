@@ -51,7 +51,7 @@ Engine_ZGlut : CroneEngine {
 
 			var grain_trig;
 			var trig_rnd;
-			var jitter_sig;
+			var jitter_sig, jitter_sig2, jigger_sig3, jitter_sig4;
 			var buf_dur;
 			var pan_sig;
 			var pan_sig2;
@@ -84,6 +84,15 @@ Engine_ZGlut : CroneEngine {
 				hi: 1);
 
 			jitter_sig = TRand.kr(trig: grain_trig,
+				lo: buf_dur.reciprocal.neg * jitter,
+				hi: buf_dur.reciprocal * jitter);
+			jitter_sig2 = TRand.kr(trig: grain_trig,
+				lo: buf_dur.reciprocal.neg * jitter,
+				hi: buf_dur.reciprocal * jitter);
+			jitter_sig3 = TRand.kr(trig: grain_trig,
+				lo: buf_dur.reciprocal.neg * jitter,
+				hi: buf_dur.reciprocal * jitter);
+			jitter_sig4 = TRand.kr(trig: grain_trig,
 				lo: buf_dur.reciprocal.neg * jitter,
 				hi: buf_dur.reciprocal * jitter);
 
@@ -122,7 +131,7 @@ Engine_ZGlut : CroneEngine {
 						trigger:grain_trig, 
 						dur:size, 
 						sndbuf:buf, 
-						pos: pos_sig + jitter_sig, 
+						pos: pos_sig + jitter_sig2, 
 						interp: 2, 
 						pan: pan_sig,
 						rate:pitch/2,
@@ -134,7 +143,7 @@ Engine_ZGlut : CroneEngine {
 						trigger:grain_trig, 
 						dur:size, 
 						sndbuf:buf2, 
-						pos: pos_sig + jitter_sig, 
+						pos: pos_sig + jitter_sig2, 
 						interp: 2, 
 						pan: pan_sig2,
 						rate:pitch/2,
@@ -146,7 +155,7 @@ Engine_ZGlut : CroneEngine {
 						trigger:grain_trig, 
 						dur:size, 
 						sndbuf:buf, 
-						pos: pos_sig + jitter_sig, 
+						pos: pos_sig + jitter_sig3, 
 						interp: 2, 
 						pan: pan_sig,
 						rate:pitch*2,
@@ -158,7 +167,7 @@ Engine_ZGlut : CroneEngine {
 						trigger:grain_trig, 
 						dur:size, 
 						sndbuf:buf2, 
-						pos: pos_sig + jitter_sig, 
+						pos: pos_sig + jitter_sig3, 
 						interp: 2, 
 						pan: pan_sig2,
 						rate:pitch*2,
@@ -170,7 +179,7 @@ Engine_ZGlut : CroneEngine {
 						trigger:grain_trig, 
 						dur:size, 
 						sndbuf:buf, 
-						pos: pos_sig + jitter_sig, 
+						pos: pos_sig + jitter_sig4, 
 						interp: 2, 
 						pan: pan_sig,
 						rate:pitch*4,
@@ -182,7 +191,7 @@ Engine_ZGlut : CroneEngine {
 						trigger:grain_trig, 
 						dur:size, 
 						sndbuf:buf2, 
-						pos: pos_sig + jitter_sig, 
+						pos: pos_sig + jitter_sig4, 
 						interp: 2, 
 						pan: pan_sig2,
 						rate:pitch*4,
