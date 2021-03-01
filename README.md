@@ -12,8 +12,9 @@ their are a lot of granulation scripts based on glut, here's what's different ab
 - "size" and "density" of granulation are quantized, and easily accessed (see layout)
 - sequencer is quantized (using @tyleretters's lattice)
 - voices limited to only 4
-- samples mapped to 21 keys 
+- samples mapped to 18 keys 
 - can record live input
+- granulation uses stereo samples
 
 reference in that demo video above - here are the four samples used. first two are things i recorded with [mx.samples](https://llllllll.co/t/mx-samples/41400), the other two are samples @tehn included on the default norns:
 
@@ -25,11 +26,12 @@ reference in that demo video above - here are the four samples used. first two a
 
 ### Documentation
 
-here's how the buttons are laid out. use e2 and e3 on the norns to move around and k2/k3 to toggle things. the grid just mirrors the norns screen, so this script works just fine without a grid.
+here's how the buttons are laid out. use e2 and e3 on the norns to move around and k2/k3 to toggle things. the grid just mirrors the norns screen, so this script works just fine without a grid. _grid 64 users:_ hold k1 to switch between the the first and second pair of voices.
 
 ![granchild_grid-01](https://user-images.githubusercontent.com/6550035/108640397-40e5b880-744e-11eb-93da-83bda151e44d.jpg)
 
 _note:_ when you use the record button for live input, all recordings are automatically saved permanently in `~/dust/audio/granchild`.
+
 
 ### Install
 
