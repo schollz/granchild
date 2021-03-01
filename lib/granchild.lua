@@ -15,13 +15,12 @@ function Granchild:new(args)
   m.scene="a"
 
   -- initiate the grid
+  m.grid64==m.g.cols==8
+  m.grid64default=true
   m.g=grid.connect()
   m.grid_width=16
-  if m.g.cols==8 then
-    m.grid_width=8
-  end
   m.g.key=function(x,y,z)
-    if m.g.cols>0 and m.grid_on then
+    if m.grid_on then
       m:grid_key(x,y,z)
     end
   end
@@ -517,10 +516,21 @@ end
 function Granchild:grid_redraw()
   self.g:all(0)
   local gd=self:get_visual()
+  local s=1
+  local e=self.grid_width
+  local adj=0
+  if self.grid64 then
+    e=8
+    if not self.grid64default then
+      s=9
+      e=16
+      adj=-8
+    end
+  end
   for row=1,8 do
-    for col=1,self.grid_width do
+    for col=s,e do
       if gd[row][col]~=0 then
-        self.g:led(col,row,gd[row][col])
+        self.g:led(col+adj,row,gd[row][col])
       end
     end
   end
