@@ -22,14 +22,14 @@ local param_list_delay={"delay_volume","delay_mod_freq","delay_mod_depth","delay
 local function bang(scene)
   for i=1,4 do
     for _,param_name in ipairs(param_list) do
-      local p = params:lookup_param(i..param_name..scene)
+      local p=params:lookup_param(i..param_name..scene)
       p:bang()
     end
-    local p = params:lookup_param(i.."pattern"..scene)
+    local p=params:lookup_param(i.."pattern"..scene)
     p:bang()
   end
   for _,param_name in ipairs(param_list_delay) do
-    local p = params:lookup_param(param_name..scene)
+    local p=params:lookup_param(param_name..scene)
     p:bang()
   end
 end
@@ -42,20 +42,20 @@ local function setup_params()
     params:add_group("sample "..i,51)
     params:add_option(i.."scene","scene",{"a","b"},1)
     params:set_action(i.."scene",function(scene)
-        for _,param_name in ipairs(param_list) do
-          params:hide(i..param_name..(3-scene))
-          params:show(i..param_name..scene)
-          local p = params:lookup_param(i..param_name..scene)
-          p:bang()
-        end
-        local p = params:lookup_param(i.."pattern"..scene)
+      for _,param_name in ipairs(param_list) do
+        params:hide(i..param_name..(3-scene))
+        params:show(i..param_name..scene)
+        local p=params:lookup_param(i..param_name..scene)
         p:bang()
-        if params:get(i.."pattern"..scene) == "" or params:get(i.."pattern"..scene) == "[]" then 
-          granchild_grid:toggle_playing_voice(i,false)
-        end
-        if _menu.rebuild_params ~= nil then
-          _menu.rebuild_params()
-        end
+      end
+      local p=params:lookup_param(i.."pattern"..scene)
+      p:bang()
+      if params:get(i.."pattern"..scene)=="" or params:get(i.."pattern"..scene)=="[]" then
+        granchild_grid:toggle_playing_voice(i,false)
+      end
+      if _menu.rebuild_params~=nil then
+        _menu.rebuild_params()
+      end
     end)
     for scene=1,2 do
       params:add_file(i.."sample"..scene,"sample")
@@ -64,7 +64,7 @@ local function setup_params()
         if file~="-" then
           engine.read(i,file)
           params:set(i.."play"..scene,2)
-          if params:get(i.."sample"..(3-scene))=="-" then 
+          if params:get(i.."sample"..(3-scene))=="-" then
             -- load for other scene by default
             params:set(i.."sample"..(3-scene),file,true)
             params:set(i.."play"..(3-scene),2,true)
@@ -156,15 +156,15 @@ local function setup_params()
 
 
   params:add_group("delay",17)
-    params:add_option("delayscene","scene",{"a","b"},1)
-    params:set_action("delayscene",function(scene)
-        for _,param_name in ipairs(param_list_delay) do
-          params:hide(i..param_name..(3-scene))
-          params:show(i..param_name..scene)
-          local p = params:lookup_param(i..param_name..scene)
-          p:bang()
-        end
-    end)
+  params:add_option("delayscene","scene",{"a","b"},1)
+  params:set_action("delayscene",function(scene)
+    for _,param_name in ipairs(param_list_delay) do
+      params:hide(i..param_name..(3-scene))
+      params:show(i..param_name..scene)
+      local p=params:lookup_param(i..param_name..scene)
+      p:bang()
+    end
+  end)
   for scene=1,2 do
     -- effect controls
     -- delay time

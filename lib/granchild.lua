@@ -4,7 +4,7 @@ local lattice=require("lattice")
 local Granchild={}
 
 local pitch_mods={-12,-7,-5,-3,0,3,5,7,12}
-local num_steps = 18
+local num_steps=18
 
 function Granchild:new(args)
   local m=setmetatable({},{__index=Granchild})
@@ -254,7 +254,7 @@ function Granchild:set_steps(voice,steps_string)
     if steps~=nil then
       self.voices[voice].steps=steps
     else
-      self.voices[voice].steps = {}
+      self.voices[voice].steps={}
     end
   end
 end
@@ -274,11 +274,11 @@ function Granchild:toggle_recording(col)
 end
 
 function Granchild:toggle_playing_voice(voice,on)
-  if on == nil then
+  if on==nil then
     self.voices[voice].is_playing=not self.voices[voice].is_playing
   else
     self.voices[voice].is_playing=on
-  end    
+  end
   if self.voices[voice].is_playing then
     params:set(voice.."pattern"..params:get(voice.."scene"),json.encode(self.voices[voice].steps),true)
     self.voices[voice].is_recording=false
@@ -333,18 +333,18 @@ function Granchild:change_volume(row,col)
 end
 
 function Granchild:change_pitch_mod(row,col)
-  local voice =  math.floor((col-1)/4)+1
-  col = col%4
-  local diff = -1*((3-col)*2-1)
-  self.voices[voice].pitch_mod_i = self.voices[voice].pitch_mod_i + diff
-  self.voices[voice].pitch_mod_i = util.clamp(self.voices[voice].pitch_mod_i,1,#pitch_mods)
+  local voice=math.floor((col-1)/4)+1
+  col=col%4
+  local diff=-1*((3-col)*2-1)
+  self.voices[voice].pitch_mod_i=self.voices[voice].pitch_mod_i+diff
+  self.voices[voice].pitch_mod_i=util.clamp(self.voices[voice].pitch_mod_i,1,#pitch_mods)
   print(self.voices[voice].pitch_mod_i)
   params:set(voice.."pitch"..params:get(voice.."scene"),pitch_mods[self.voices[voice].pitch_mod_i])
   print("change_pitch_mod "..voice.." "..diff.." "..params:get(voice.."pitch"..params:get(voice.."scene")))
 end
 
 function Granchild:change_scene(col)
-  local voice =  math.floor((col-1)/4)+1
+  local voice=math.floor((col-1)/4)+1
   params:set(voice.."scene",3-params:get(voice.."scene"))
 end
 
@@ -447,7 +447,7 @@ function Granchild:get_visual()
   -- show the scene
   for i=1,self.num_voices do
     local val=params:get(i.."scene")
-    if val == 1 then 
+    if val==1 then
       self.visual[7][4*(i-1)+4]=7
     else
       self.visual[7][4*(i-1)+4]=15
