@@ -80,7 +80,22 @@ Engine_ZGlut : CroneEngine {
 
 			pos_sig = Wrap.kr(Select.kr(freeze, [buf_pos, pos]));
 
-			sig = GrainBuf.ar(2, grain_trig, size, buf, pitch, pos_sig + jitter_sig, 2, pan_sig);
+			sig = Mix.ar(
+				GrainBuf.ar(
+				numChannels: 2, 
+				trigger:grain_trig, 
+				dur:size, 
+				sndbuf: buf, 
+				pos: pos_sig + jitter_sig, 
+				interp: 2, 
+				pan: pan_sig,
+				// rate:[pitch,pitch],
+				// mul:0.5
+				rate: [pitch/2,pitch/2,pitch,pitch,pitch*1.3348,pitch*1.3348,pitch*2,pitch*2,pitch*4,pitch*4], 
+				maxGrains:[128/2,128/2,256/2,256/2,64/2,64/2,128/2,128/2,64/2,64/2],
+				mul:[0.125,0.125,0.625,0.625,0.00,0.00,0.15,0.15,0.05,0.05]/2
+				)
+			);
 			sig = BLowPass4.ar(sig, cutoff, q);
 			sig = Compander.ar(sig,sig,0.25);
 			env = EnvGen.kr(Env.asr(1, 1, 1), gate: gate, timeScale: envscale);
