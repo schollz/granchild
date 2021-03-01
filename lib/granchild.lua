@@ -254,6 +254,7 @@ end
 
 
 function Granchild:set_steps(voice,steps_string)
+  print("set_steps for voice "..voice..": "..steps_string)
   if steps_string~="" then
     local steps=json.decode(steps_string)
     if steps~=nil then
