@@ -61,8 +61,6 @@ Engine_ZGlut : CroneEngine {
 
 			var env;
 			var level;
-			var subharmonic_grains=96;
-			var overtone_grains=128;
 			var subharmonic_vol=0.4;
 			var overtone_vol=0.2;
 
@@ -104,7 +102,7 @@ Engine_ZGlut : CroneEngine {
 						interp: 2, 
 						pan: pan_sig,
 						rate:pitch,
-						maxGrains:512-((subharmonics>0)*subharmonic_grains)-((overtones>0)*overtone_grains),
+						maxGrains:128,
 						mul:1.0-((subharmonics>0)*subharmonic_vol)-((overtones>0)*overtone_vol),
 					)+
 				  GrainBuf.ar(
@@ -116,7 +114,7 @@ Engine_ZGlut : CroneEngine {
 						interp: 2, 
 						pan: pan_sig2,
 						rate:pitch,
-						maxGrains:512-((subharmonics>0)*subharmonic_grains)-((overtones>0)*overtone_grains),
+						maxGrains:128,
 						mul:1.0-((subharmonics>0)*subharmonic_vol)-((overtones>0)*overtone_vol),
 					)+
 				((subharmonics>0)*(GrainBuf.ar(
@@ -128,7 +126,7 @@ Engine_ZGlut : CroneEngine {
 						interp: 2, 
 						pan: pan_sig,
 						rate:pitch/2,
-						maxGrains:subharmonic_grains,
+						maxGrains:96,
 						mul:subharmonic_vol,
 					)+
 				  GrainBuf.ar(
@@ -140,7 +138,7 @@ Engine_ZGlut : CroneEngine {
 						interp: 2, 
 						pan: pan_sig2,
 						rate:pitch/2,
-						maxGrains:subharmonic_grains,
+						maxGrains:96,
 						mul:subharmonic_vol,
 					)))+
 				((overtones>0)*(GrainBuf.ar(
@@ -152,7 +150,7 @@ Engine_ZGlut : CroneEngine {
 						interp: 2, 
 						pan: pan_sig,
 						rate:pitch*2,
-						maxGrains:overtone_grains*0.75,
+						maxGrains:64,
 						mul:overtone_vol*0.7,
 					)+
 				  GrainBuf.ar(
@@ -164,7 +162,7 @@ Engine_ZGlut : CroneEngine {
 						interp: 2, 
 						pan: pan_sig2,
 						rate:pitch*2,
-						maxGrains:overtone_grains*0.75,
+						maxGrains:64,
 						mul:overtone_vol*0.7,
 					)+
 				GrainBuf.ar(
@@ -176,7 +174,7 @@ Engine_ZGlut : CroneEngine {
 						interp: 2, 
 						pan: pan_sig,
 						rate:pitch*4,
-						maxGrains:overtone_grains*0.25,
+						maxGrains:48,
 						mul:overtone_vol*0.3,
 					)+
 				  GrainBuf.ar(
@@ -188,7 +186,7 @@ Engine_ZGlut : CroneEngine {
 						interp: 2, 
 						pan: pan_sig2,
 						rate:pitch*4,
-						maxGrains:overtone_grains*0.25,
+						maxGrains:48,
 						mul:overtone_vol*0.3,
 					)))
 				  ;
