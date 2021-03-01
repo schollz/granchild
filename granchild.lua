@@ -53,8 +53,8 @@ local function setup_params()
         if params:get(i.."pattern"..scene) == "" or params:get(i.."pattern"..scene) == "[]" then 
           granchild_grid:toggle_playing_voice(i,false)
         end
-        if _menu.m.PARAMS.rebuild_sub ~= nil then
-          _menu.m.PARAMS.rebuild_sub()
+        if _menu.rebuild_params ~= nil then
+          _menu.rebuild_params()
         end
     end)
     for scene=1,2 do
