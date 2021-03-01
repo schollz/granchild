@@ -19,18 +19,23 @@ Engine_ZGlut : CroneEngine {
 	readBuf { arg i, path;
 		if(buffers[i].notNil, {
 			if (File.exists(path), {
-				// TODO: load stereo files and duplicate GrainBuf for stereo granulation
+				// load stereo files and duplicate GrainBuf for stereo granulation
 				var newbuf = Buffer.readChannel(context.server, path, 0, -1, [0], {
 					voices[i].set(\buf, newbuf);
 					buffers[i].free;
 					buffers[i] = newbuf;
+				});
+				var newbuf2 = Buffer.readChannel(context.server, path, 0, -1, [1], {
+					voices[i].set(\buf2, newbuf2);
+					buffers[i+4].free;
+					buffers[i+4] = newbuf2;
 				});
 			});
 		});
 	}
 
 	alloc {
-		buffers = Array.fill(nvoices, { arg i;
+		buffers = Array.fill(nvoices*2, { arg i;
 			Buffer.alloc(
 				context.server,
 				context.server.sampleRate * 1,
@@ -38,7 +43,7 @@ Engine_ZGlut : CroneEngine {
 		});
 
 		SynthDef(\synth, {
-			arg out, effectBus, phase_out, level_out, buf,
+			arg out, effectBus, phase_out, level_out, buf, buf2,
 			gate=0, pos=0, speed=1, jitter=0,
 			size=0.1, density=20, pitch=1, spread=0, gain=1, envscale=1,
 			freeze=0, t_reset_pos=0, cutoff=20000, q, mode=0, send=0;
@@ -48,6 +53,7 @@ Engine_ZGlut : CroneEngine {
 			var jitter_sig;
 			var buf_dur;
 			var pan_sig;
+			var pan_sig2;
 			var buf_pos;
 			var pos_sig;
 			var sig;
@@ -67,8 +73,12 @@ Engine_ZGlut : CroneEngine {
 			buf_dur = BufDur.kr(buf);
 
 			pan_sig = TRand.kr(trig: grain_trig,
-				lo: spread.neg,
-				hi: spread);
+				lo: -1,
+				hi: 2*spread-1);
+
+			pan_sig2 = TRand.kr(trig: grain_trig,
+				lo: 1-2*spread,
+				hi: 1);
 
 			jitter_sig = TRand.kr(trig: grain_trig,
 				lo: buf_dur.reciprocal.neg * jitter,
@@ -80,22 +90,115 @@ Engine_ZGlut : CroneEngine {
 
 			pos_sig = Wrap.kr(Select.kr(freeze, [buf_pos, pos]));
 
-			sig = Mix.ar(
+			sig = GrainBuf.ar(
+						numChannels: 2, 
+						trigger:grain_trig, 
+						dur:size, 
+						sndbuf:buf, 
+						pos: pos_sig + jitter_sig, 
+						interp: 2, 
+						pan: pan_sig,
+						rate:pitch,
+						maxGrains:128,
+						mul:0.625,
+					)+
+				  GrainBuf.ar(
+						numChannels: 2, 
+						trigger:grain_trig, 
+						dur:size, 
+						sndbuf:buf2, 
+						pos: pos_sig + jitter_sig, 
+						interp: 2, 
+						pan: pan_sig2,
+						rate:pitch,
+						maxGrains:128,
+						mul:0.625,
+					)+
 				GrainBuf.ar(
-				numChannels: 2, 
-				trigger:grain_trig, 
-				dur:size, 
-				sndbuf: buf, 
-				pos: pos_sig + jitter_sig, 
-				interp: 2, 
-				pan: pan_sig,
-				// rate:[pitch,pitch],
-				// mul:0.5
-				rate: [pitch/2,pitch/2,pitch,pitch,pitch*1.3348,pitch*1.3348,pitch*2,pitch*2,pitch*4,pitch*4], 
-				maxGrains:[128/2,128/2,256/2,256/2,64/2,64/2,128/2,128/2,64/2,64/2],
-				mul:[0.125,0.125,0.625,0.625,0.00,0.00,0.15,0.15,0.05,0.05]/2
-				)
-			);
+						numChannels: 2, 
+						trigger:grain_trig, 
+						dur:size, 
+						sndbuf:buf, 
+						pos: pos_sig + jitter_sig, 
+						interp: 2, 
+						pan: pan_sig,
+						rate:pitch/2,
+						maxGrains:64,
+						mul:0.125,
+					)+
+				  GrainBuf.ar(
+						numChannels: 2, 
+						trigger:grain_trig, 
+						dur:size, 
+						sndbuf:buf2, 
+						pos: pos_sig + jitter_sig, 
+						interp: 2, 
+						pan: pan_sig2,
+						rate:pitch/2,
+						maxGrains:64,
+						mul:0.125,
+					)+
+				GrainBuf.ar(
+						numChannels: 2, 
+						trigger:grain_trig, 
+						dur:size, 
+						sndbuf:buf, 
+						pos: pos_sig + jitter_sig, 
+						interp: 2, 
+						pan: pan_sig,
+						rate:pitch*2,
+						maxGrains:48,
+						mul:0.12,
+					)+
+				  GrainBuf.ar(
+						numChannels: 2, 
+						trigger:grain_trig, 
+						dur:size, 
+						sndbuf:buf2, 
+						pos: pos_sig + jitter_sig, 
+						interp: 2, 
+						pan: pan_sig2,
+						rate:pitch*2,
+						maxGrains:48,
+						mul:0.12,
+					)+
+				GrainBuf.ar(
+						numChannels: 2, 
+						trigger:grain_trig, 
+						dur:size, 
+						sndbuf:buf, 
+						pos: pos_sig + jitter_sig, 
+						interp: 2, 
+						pan: pan_sig,
+						rate:pitch*4,
+						maxGrains:24,
+						mul:0.05,
+					)+
+				  GrainBuf.ar(
+						numChannels: 2, 
+						trigger:grain_trig, 
+						dur:size, 
+						sndbuf:buf2, 
+						pos: pos_sig + jitter_sig, 
+						interp: 2, 
+						pan: pan_sig2,
+						rate:pitch*4,
+						maxGrains:24,
+						mul:0.05,
+					)
+				  ;
+						// maxGrains:[128,256,64,128,64]/2,
+						// mul:[0.125,0.625,0.05,0.15,0.05]/2,
+			// sig = GrainBuf.ar(
+			// 	numChannels: 2, 
+			// 	trigger:grain_trig, 
+			// 	dur:size, 
+			// 	sndbuf: [buf,buf2], 
+			// 	pos: pos_sig + jitter_sig, 
+			// 	interp: 2, 
+			// 	pan: pan_sig,
+			// 	rate: pitch, 
+			// 	);
 			sig = BLowPass4.ar(sig, cutoff, q);
 			sig = Compander.ar(sig,sig,0.25);
 			env = EnvGen.kr(Env.asr(1, 1, 1), gate: gate, timeScale: envscale);
@@ -135,6 +238,7 @@ Engine_ZGlut : CroneEngine {
 				\phase_out, phases[i].index,
 				\level_out, levels[i].index,
 				\buf, buffers[i],
+				\buf2, buffers[i+4],
 			], target: pg);
 		});
 
