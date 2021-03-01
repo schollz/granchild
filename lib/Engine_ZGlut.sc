@@ -46,7 +46,8 @@ Engine_ZGlut : CroneEngine {
 			arg out, effectBus, phase_out, level_out, buf, buf2,
 			gate=0, pos=0, speed=1, jitter=0,
 			size=0.1, density=20, pitch=1, spread=0, gain=1, envscale=1,
-			freeze=0, t_reset_pos=0, cutoff=20000, q, mode=0, send=0;
+			freeze=0, t_reset_pos=0, cutoff=20000, q, mode=0, send=0,
+			subharmonics=0,overtones=0;
 
 			var grain_trig;
 			var trig_rnd;
@@ -114,7 +115,7 @@ Engine_ZGlut : CroneEngine {
 						maxGrains:128,
 						mul:0.625,
 					)+
-				GrainBuf.ar(
+				((subharmonics>0)*(GrainBuf.ar(
 						numChannels: 2, 
 						trigger:grain_trig, 
 						dur:size, 
@@ -124,7 +125,7 @@ Engine_ZGlut : CroneEngine {
 						pan: pan_sig,
 						rate:pitch/2,
 						maxGrains:64,
-						mul:0.125,
+						mul:0.4,
 					)+
 				  GrainBuf.ar(
 						numChannels: 2, 
@@ -136,9 +137,9 @@ Engine_ZGlut : CroneEngine {
 						pan: pan_sig2,
 						rate:pitch/2,
 						maxGrains:64,
-						mul:0.125,
-					)+
-				GrainBuf.ar(
+						mul:0.4,
+					)))+
+				((overtones>0)*(GrainBuf.ar(
 						numChannels: 2, 
 						trigger:grain_trig, 
 						dur:size, 
@@ -185,7 +186,7 @@ Engine_ZGlut : CroneEngine {
 						rate:pitch*4,
 						maxGrains:24,
 						mul:0.05,
-					)
+					)))
 				  ;
 						// maxGrains:[128,256,64,128,64]/2,
 						// mul:[0.125,0.625,0.05,0.15,0.05]/2,
@@ -363,6 +364,16 @@ Engine_ZGlut : CroneEngine {
 		this.addCommand("volume", "if", { arg msg;
 			var voice = msg[1] - 1;
 			voices[voice].set(\gain, msg[2]);
+		});
+		
+		this.addCommand("overtones", "if", { arg msg;
+			var voice = msg[1] - 1;
+			voices[voice].set(\overtones, msg[2]);
+		});
+		
+		this.addCommand("subharmonics", "if", { arg msg;
+			var voice = msg[1] - 1;
+			voices[voice].set(\subharmonics, msg[2]);
 		});
 
 		nvoices.do({ arg i;

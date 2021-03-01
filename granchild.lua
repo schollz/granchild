@@ -16,7 +16,7 @@ local press_positions={{0,0},{0,0}}
 local norns_screen={}
 local divisions={1,2,4,6,8,12,16}
 local division_names={"2 wn","wn","hn","hn-t","qn","qn-t","eighth"}
-local param_list={"sizelfo","densitylfo","speedlfo","volumelfo","spreadlfo","jitterlfo","spread","jitter","size","pos","q","division","speed","send","q","cutoff","fade","pitch","density","volume","seek","play","sample"}
+local param_list={"overtones","subharmonics","sizelfo","densitylfo","speedlfo","volumelfo","spreadlfo","jitterlfo","spread","jitter","size","pos","q","division","speed","send","q","cutoff","fade","pitch","density","volume","seek","play","sample"}
 local param_list_delay={"delay_volume","delay_mod_freq","delay_mod_depth","delay_fdbk","delay_diff","delay_damp","delay_size","delay_time"}
 
 local function bang(scene)
@@ -39,7 +39,7 @@ local function setup_params()
   local num_voices=4
   local old_volume={0.25,0.25,0.25,0.25}
   for i=1,num_voices do
-    params:add_group("sample "..i,47)
+    params:add_group("sample "..i,51)
     params:add_option(i.."scene","scene",{"a","b"},1)
     params:set_action(i.."scene",function(scene)
         for _,param_name in ipairs(param_list) do
@@ -136,6 +136,12 @@ local function setup_params()
       params:add_taper(i.."spread"..scene,"spread",0,100,0,0,"%")
       params:set_action(i.."spread"..scene,function(value) engine.spread(i,value/100) end)
       params:add_option(i.."spreadlfo"..scene,"spread lfo",{"off","on"},2)
+
+      params:add_option(i.."overtones"..scene,"overtones",{"off","on"},1)
+      params:set_action(i.."overtones"..scene,function(value) engine.overtones(i,value-1) end)
+
+      params:add_option(i.."subharmonics"..scene,"subharmonics",{"off","on"},1)
+      params:set_action(i.."subharmonics"..scene,function(value) engine.subharmonics(i,value-1) end)
 
       params:add_text(i.."pattern"..scene,"pattern","")
       params:hide(i.."pattern"..scene)
