@@ -78,6 +78,8 @@ function Granchild:new(args)
     {name="speed",range={-0.05,0.05},lfo={16,24}},
     {name="density",range={3,16},lfo={16,24}},
     {name="size",range={2,12},lfo={24,58}},
+    {name="subharmonics",range={0,1},lfo={24,70}},
+    {name="overtones",range={0,0.2},lfo={36,60}},
   }
   m.mod_vals={}
 
