@@ -35,12 +35,7 @@ _note:_ when you use the record button for live input, all recordings are automa
 
 ### Old versions
 
-#### version 1.2.1 - minor update
-
 ![image](https://user-images.githubusercontent.com/6550035/109594890-63b84280-7ac8-11eb-8d8c-17651c2fe985.png)
-
-- bug fix: keep samples off until loaded
-- bug fix: turn off send if volume set to 0
 
 ### Install
 
