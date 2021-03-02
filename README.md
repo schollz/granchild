@@ -14,7 +14,7 @@ their are a lot of granulation scripts based on glut, here's what's different ab
 - voices limited to only 4
 - samples mapped to 18 keys 
 - can record live input
-- granulation uses stereo samples
+- granulation can utilize stereo samples
 
 reference in that demo video above - here are the four samples used. first two are things i recorded with [mx.samples](https://llllllll.co/t/mx-samples/41400), the other two are samples @tehn included on the default norns:
 
@@ -32,8 +32,15 @@ here's how the buttons are laid out. use e2 and e3 on the norns to move around a
 
 _note:_ when you use the record button for live input, all recordings are automatically saved permanently in `~/dust/audio/granchild`.
 
-### Old versions
+### Install
 
+from maiden:
+
+```
+;install https://github.com/schollz/granchild
+```
+
+### Old versions
 
 #### version 1.2.1 - minor update
 
@@ -42,17 +49,4 @@ _note:_ when you use the record button for live input, all recordings are automa
 
 - bug fix: keep samples off until loaded
 - bug fix: turn off send if volume set to 0
-
-
-
-
-
-
-### Install
-
-from maiden:
-
-```
-;install https://github.com/schollz/granchild
-```
 
