@@ -51,7 +51,7 @@ Engine_ZGlut : CroneEngine {
 
 			var grain_trig;
 			var trig_rnd;
-			var jitter_sig, jitter_sig2, jigger_sig3, jitter_sig4;
+			var jitter_sig, jitter_sig2, jitter_sig3, jitter_sig4;
 			var buf_dur;
 			var pan_sig;
 			var pan_sig2;
@@ -61,8 +61,9 @@ Engine_ZGlut : CroneEngine {
 
 			var env;
 			var level;
-			var subharmonic_vol=0.4;
-			var overtone_vol=0.2;
+			var main_vol=1.0/(1.0+subharmonics+overtones);
+			var subharmonic_vol=subharmonics/(1.0+subharmonics+overtones);
+			var overtone_vol=overtones/(1.0+subharmonics+overtones);
 
 			density = Lag.kr(density);
 			spread = Lag.kr(spread);
@@ -112,7 +113,7 @@ Engine_ZGlut : CroneEngine {
 						pan: pan_sig,
 						rate:pitch,
 						maxGrains:128,
-						mul:1.0-((subharmonics>0)*subharmonic_vol)-((overtones>0)*overtone_vol),
+						mul:main_vol,
 					)+
 				  GrainBuf.ar(
 						numChannels: 2, 
@@ -124,9 +125,9 @@ Engine_ZGlut : CroneEngine {
 						pan: pan_sig2,
 						rate:pitch,
 						maxGrains:128,
-						mul:1.0-((subharmonics>0)*subharmonic_vol)-((overtones>0)*overtone_vol),
+						mul:main_vol,
 					)+
-				((subharmonics>0)*(GrainBuf.ar(
+				GrainBuf.ar(
 						numChannels: 2, 
 						trigger:grain_trig, 
 						dur:size, 
@@ -149,8 +150,8 @@ Engine_ZGlut : CroneEngine {
 						rate:pitch/2,
 						maxGrains:96,
 						mul:subharmonic_vol,
-					)))+
-				((overtones>0)*(GrainBuf.ar(
+					)+
+				GrainBuf.ar(
 						numChannels: 2, 
 						trigger:grain_trig, 
 						dur:size, 
@@ -197,7 +198,7 @@ Engine_ZGlut : CroneEngine {
 						rate:pitch*4,
 						maxGrains:48,
 						mul:overtone_vol*0.3,
-					)))
+					)
 				  ;
 						// maxGrains:[128,256,64,128,64]/2,
 						// mul:[0.125,0.625,0.05,0.15,0.05]/2,

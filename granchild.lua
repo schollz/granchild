@@ -137,11 +137,11 @@ local function setup_params()
       params:set_action(i.."spread"..scene,function(value) engine.spread(i,value/100) end)
       params:add_option(i.."spreadlfo"..scene,"spread lfo",{"off","on"},2)
 
-      params:add_option(i.."overtones"..scene,"overtones",{"off","on"},1)
-      params:set_action(i.."overtones"..scene,function(value) engine.overtones(i,value-1) end)
+      params:add_control(i.."subharmonics"..scene,"subharmonic vol",controlspec.new(0.00,1.00,"lin",0.01,0))
+      params:set_action(i.."subharmonics"..scene,function(value) engine.subharmonics(i,value) end)
 
-      params:add_option(i.."subharmonics"..scene,"subharmonics",{"off","on"},1)
-      params:set_action(i.."subharmonics"..scene,function(value) engine.subharmonics(i,value-1) end)
+      params:add_control(i.."overtones"..scene,"overtone vol",controlspec.new(0.00,1.00,"lin",0.01,0))
+      params:set_action(i.."overtones"..scene,function(value) engine.overtones(i,value) end)
 
       params:add_text(i.."pattern"..scene,"pattern","")
       params:hide(i.."pattern"..scene)

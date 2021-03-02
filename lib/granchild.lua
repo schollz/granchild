@@ -15,9 +15,9 @@ function Granchild:new(args)
   m.scene="a"
 
   -- initiate the grid
-  m.grid64==m.g.cols==8
-  m.grid64default=true
   m.g=grid.connect()
+  m.grid64=m.g.cols==8
+  m.grid64default=true
   m.grid_width=16
   m.g.key=function(x,y,z)
     if m.grid_on then
@@ -230,7 +230,7 @@ function Granchild:key_press(row,col,on)
   if (col%4==2 or col%4==3 or col%4==0) and row<7 and on then
     -- change position
     self:change_position(row,col)
-  elseif col%4==1 and (row==7 or row==8) and on then
+  elseif col%4==2 and (row==7 or row==8) and on then
     self:change_pitch_mod(row,col)
   elseif (col%4==0) and row==7 and on then
     self:change_scene(col)
