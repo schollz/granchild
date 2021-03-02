@@ -3,8 +3,8 @@ local lattice=require("lattice")
 
 local Granchild={}
 
-local pitch_mods={-12,-7,-5,0,5,7,12}
-
+local pitch_mods={-12,-7,-5,-3,0,3,5,7,12}
+local num_steps=18
 
 function Granchild:new(args)
   local m=setmetatable({},{__index=Granchild})
@@ -12,14 +12,15 @@ function Granchild:new(args)
   m.grid_on=args.grid_on==nil and true or args.grid_on
   m.toggleable=args.toggleable==nil and false or args.toggleable
 
+  m.scene="a"
+
   -- initiate the grid
   m.g=grid.connect()
+  m.grid64=m.g.cols==8
+  m.grid64default=true
   m.grid_width=16
-  if m.g.cols==8 then
-    m.grid_width=8
-  end
   m.g.key=function(x,y,z)
-    if m.g.cols>0 and m.grid_on then
+    if m.grid_on then
       m:grid_key(x,y,z)
     end
   end
@@ -65,18 +66,20 @@ function Granchild:new(args)
       steps={},
       step=0,
       step_val=0,
-      pitch_mod_i=4,
+      pitch_mod_i=5,
     }
   end
 
   -- setup lfos
   local mod_parameters={
-    {name="jitter",range={5,100},lfo={32,64}},
+    {name="jitter",range={15,200},lfo={32,64}},
     {name="spread",range={0,100},lfo={16,24}},
     {name="volume",range={0,0.25},lfo={16,24}},
     {name="speed",range={-0.05,0.05},lfo={16,24}},
     {name="density",range={3,16},lfo={16,24}},
     {name="size",range={2,12},lfo={24,58}},
+    {name="subharmonics",range={0,1},lfo={24,70}},
+    {name="overtones",range={0,0.2},lfo={36,60}},
   }
   m.mod_vals={}
 
@@ -147,7 +150,6 @@ function Granchild:new(args)
     phase_poll:start()
   end
 
-
   return m
 end
 
@@ -161,7 +163,7 @@ function Granchild:emit_note(division)
       end
       local step_val=self.voices[i].steps[self.voices[i].step]
       if step_val~=self.voices[i].step_val and step_val~=nil then
-        params:set(i.."seek",util.linlin(1,21,0,1,step_val)+(math.random()-0.5)/100)
+        params:set(i.."seek"..params:get(i.."scene"),util.linlin(1,num_steps,0,1,step_val)+(math.random()-0.5)/100)
       end
       self.voices[i].step_val=step_val
       update=true
@@ -170,6 +172,10 @@ function Granchild:emit_note(division)
   if update then
     self:grid_redraw()
   end
+end
+
+function Granchild:toggle_grid64_side()
+  self.grid64default=not self.grid64default
 end
 
 function Granchild:toggle_grid(on)
@@ -203,6 +209,9 @@ function Granchild:grid_key(x,y,z)
 end
 
 function Granchild:key_press(row,col,on)
+  if self.grid64 and not self.grid64default then
+    col=col+8
+  end
   if on then
     self.pressed_buttons[row..","..col]=self:current_time()
     if row==8 and col==2 and self.toggleable then
@@ -220,9 +229,13 @@ function Granchild:key_press(row,col,on)
     end
   end
 
-  if (col%4==2 or col%4==3 or col%4==0) and row<8 and on then
+  if (col%4==2 or col%4==3 or col%4==0) and row<7 and on then
     -- change position
     self:change_position(row,col)
+  elseif col%4==2 and (row==7 or row==8) and on then
+    self:change_pitch_mod(row,col)
+  elseif (col%4==0) and row==7 and on then
+    self:change_scene(col)
   elseif col%4==1 and (row==1 or row==2) and on then
     self:change_density_mod(row,col)
   elseif col%4==1 and (row==3 or row==4) and on then
@@ -231,20 +244,25 @@ function Granchild:key_press(row,col,on)
     self:change_speed(row,col)
   elseif col%4==1 and (row==7 or row==8) and on then
     self:change_volume(row,col)
-  elseif col%4==2 and row==8 and on then
-    self:toggle_recording(col)
   elseif col%4==3 and row==8 and on then
-    self:toggle_playing(col)
+    self:toggle_recording(col)
   elseif col%4==0 and row==8 and on then
+    self:toggle_playing(col)
+  elseif col%4==3 and row==7 and on then
     self:toggle_tape_rec(col)
   end
 end
 
+
+
 function Granchild:set_steps(voice,steps_string)
+  print("set_steps for voice "..voice..": "..steps_string)
   if steps_string~="" then
     local steps=json.decode(steps_string)
     if steps~=nil then
       self.voices[voice].steps=steps
+    else
+      self.voices[voice].steps={}
     end
   end
 end
@@ -259,18 +277,26 @@ function Granchild:toggle_recording(col)
     self.voices[voice].is_playing=false
   else
     -- save steps (silently as to not trigger)
-    params:set(voice.."pattern",json.encode(self.voices[voice].steps),true)
+    params:set(voice.."pattern"..params:get(voice.."scene"),json.encode(self.voices[voice].steps),true)
+  end
+end
+
+function Granchild:toggle_playing_voice(voice,on)
+  if on==nil then
+    self.voices[voice].is_playing=not self.voices[voice].is_playing
+  else
+    self.voices[voice].is_playing=on
+  end
+  if self.voices[voice].is_playing then
+    params:set(voice.."pattern"..params:get(voice.."scene"),json.encode(self.voices[voice].steps),true)
+    self.voices[voice].is_recording=false
+    self.voices[voice].step_val=0
   end
 end
 
 function Granchild:toggle_playing(col)
   local voice=math.floor((col-1)/4)+1
-  self.voices[voice].is_playing=not self.voices[voice].is_playing
-  if self.voices[voice].is_playing then
-    params:set(voice.."pattern",json.encode(self.voices[voice].steps),true)
-    self.voices[voice].is_recording=false
-    self.voices[voice].step_val=0
-  end
+  self:toggle_playing_voice(voice)
 end
 
 function Granchild:toggle_tape_rec(col)
@@ -289,40 +315,45 @@ end
 function Granchild:change_density_mod(row,col)
   local voice=math.floor((col-1)/4)+1
   local diff=-1*((row-1)*2-1)
-  params:delta(voice.."density",diff)
-  print("change_density_mod "..voice.." "..diff.." "..params:get(voice.."density"))
+  params:delta(voice.."density"..params:get(voice.."scene"),diff)
+  print("change_density_mod "..voice.." "..diff.." "..params:get(voice.."density"..params:get(voice.."scene")))
 end
 
 function Granchild:change_size(row,col)
   local voice=math.floor((col-1)/4)+1
   local diff=-1*((row-3)*2-1)
-  params:delta(voice.."size",diff)
-  print("change_size "..voice.." "..diff.." "..params:get(voice.."size"))
+  params:delta(voice.."size"..params:get(voice.."scene"),diff)
+  print("change_size "..voice.." "..diff.." "..params:get(voice.."size"..params:get(voice.."scene")))
 end
 
 function Granchild:change_speed(row,col)
   local voice=math.floor((col-1)/4)+1
   local diff=-1*((row-5)*2-1)
-  params:delta(voice.."speed",diff)
-  print("change_speed "..voice.." "..diff.." "..params:get(voice.."speed"))
+  params:delta(voice.."speed"..params:get(voice.."scene"),diff)
+  print("change_speed "..voice.." "..diff.." "..params:get(voice.."speed"..params:get(voice.."scene")))
 end
 
 function Granchild:change_volume(row,col)
   local voice=math.floor((col-1)/4)+1
   local diff=-1*((row-7)*2-1)
-  params:delta(voice.."volume",diff)
-  print("change_volume "..voice.." "..diff.." "..params:get(voice.."volume"))
+  params:delta(voice.."volume"..params:get(voice.."scene"),diff)
+  print("change_volume "..voice.." "..diff.." "..params:get(voice.."volume"..params:get(voice.."scene")))
 end
 
--- function Granchild:change_pitch_mod(row,col)
---   local voice =  math.floor((col-1)/4)+1
---   local diff = -1 * ((row-3)*2-1)
---   self.voices[voice].pitch_mod_i = self.voices[voice].pitch_mod_i + diff
---   self.voices[voice].pitch_mod_i = util.clamp(self.voices[voice].pitch_mod_i,1,#pitch_mods)
---   print(self.voices[voice].pitch_mod_i)
---   params:set(voice.."pitch",pitch_mods[self.voices[voice].pitch_mod_i])
---   print("change_pitch_mod "..voice.." "..diff.." "..params:get(voice.."pitch"))
--- end
+function Granchild:change_pitch_mod(row,col)
+  local voice=math.floor((col-1)/4)+1
+  local diff=-1*((row-7)*2-1)
+  self.voices[voice].pitch_mod_i=self.voices[voice].pitch_mod_i+diff
+  self.voices[voice].pitch_mod_i=util.clamp(self.voices[voice].pitch_mod_i,1,#pitch_mods)
+  print(self.voices[voice].pitch_mod_i)
+  params:set(voice.."pitch"..params:get(voice.."scene"),pitch_mods[self.voices[voice].pitch_mod_i])
+  print("change_pitch_mod "..voice.." "..diff.." "..params:get(voice.."pitch"..params:get(voice.."scene")))
+end
+
+function Granchild:change_scene(col)
+  local voice=math.floor((col-1)/4)+1
+  params:set(voice.."scene",3-params:get(voice.."scene"))
+end
 
 function Granchild:change_position(row,col)
   local voice=math.floor((col-2)/4)+1
@@ -332,7 +363,7 @@ function Granchild:change_position(row,col)
     table.insert(self.voices[voice].steps,val)
   end
   print("change_position "..voice..": "..val)
-  params:set(voice.."seek",util.linlin(1,21,0,1,val)+(math.random()-0.5)/100)
+  params:set(voice.."seek"..params:get(voice.."scene"),util.linlin(1,num_steps,0,1,val)+(math.random()-0.5)/100)
 end
 
 
@@ -364,7 +395,7 @@ function Granchild:get_visual()
   -- show stop/play button
   for i=1,self.num_voices do
     local row=8
-    local col=4*(i-1)+3
+    local col=4*(i-1)+4
     self.visual[row][col]=4
     if self.voices[i].is_playing then
       self.visual[row][col]=14
@@ -374,7 +405,7 @@ function Granchild:get_visual()
   -- show rec button
   for i=1,self.num_voices do
     local row=8
-    local col=4*(i-1)+2
+    local col=4*(i-1)+3
     self.visual[row][col]=4
     if self.voices[i].is_recording then
       self.visual[row][col]=14
@@ -383,7 +414,7 @@ function Granchild:get_visual()
 
   -- show density modifiers
   for i=1,self.num_voices do
-    local val=util.linlin(1,40,0,15,params:get(i.."density"))
+    local val=util.linlin(1,40,0,15,params:get(i.."density"..params:get(i.."scene")))
     local col=4*(i-1)+1
     self.visual[1][col]=util.round(val)
     self.visual[2][col]=15-util.round(val)
@@ -391,7 +422,7 @@ function Granchild:get_visual()
 
   -- show size modifiers
   for i=1,self.num_voices do
-    local val=util.linlin(1,15,0,15,params:get(i.."size"))
+    local val=util.linlin(1,15,0,15,params:get(i.."size"..params:get(i.."scene")))
     local col=4*(i-1)+1
     self.visual[3][col]=util.round(val)
     self.visual[4][col]=15-util.round(val)
@@ -399,7 +430,7 @@ function Granchild:get_visual()
 
   -- show speed modifiers
   for i=1,self.num_voices do
-    local val=util.linlin(-2,2,0,15,params:get(i.."speed"))
+    local val=util.linlin(-2,2,0,15,params:get(i.."speed"..params:get(i.."scene")))
     local col=4*(i-1)+1
     self.visual[5][col]=util.round(val)
     self.visual[6][col]=15-util.round(val)
@@ -407,10 +438,28 @@ function Granchild:get_visual()
 
   -- show the volume
   for i=1,self.num_voices do
-    local val=util.linlin(0,1,0,15,params:get(i.."volume"))
+    local val=util.linlin(0,1,0,15,params:get(i.."volume"..params:get(i.."scene")))
     local col=4*(i-1)+1
     self.visual[7][col]=util.round(val)
     self.visual[8][col]=15-util.round(val)
+  end
+
+  -- show the pitch
+  for i=1,self.num_voices do
+    local val=util.linlin(-12,12,0,15,util.clamp(params:get(i.."pitch"..params:get(i.."scene")),-12,12))
+    local col=4*(i-1)+2
+    self.visual[7][col]=util.round(val)
+    self.visual[8][col]=15-util.round(val)
+  end
+
+  -- show the scene
+  for i=1,self.num_voices do
+    local val=params:get(i.."scene")
+    if val==1 then
+      self.visual[7][4*(i-1)+4]=7
+    else
+      self.visual[7][4*(i-1)+4]=15
+    end
   end
 
   -- show current step
@@ -422,7 +471,7 @@ function Granchild:get_visual()
       end
       if step>0 then
         for j=1,step do
-          local row,col=self:pos_to_row_col((j-1)%21+1)
+          local row,col=self:pos_to_row_col((j-1)%num_steps+1)
           col=col+4*(i-1)
           self.visual[row][col]=self.visual[row][col]+3
           if self.visual[row][col]>15 then
@@ -436,11 +485,11 @@ function Granchild:get_visual()
   -- show current position
   for i=1,self.num_voices do
     if self.voices[i].position~=nil then
-      local pos=util.linlin(0,1,1,21,self.voices[i].position)
+      local pos=util.linlin(0,1,1,num_steps,self.voices[i].position)
       local pos1=math.floor(pos)
       local diff=pos-pos1
       local pos2=pos1+1
-      if pos2>21 then
+      if pos2>num_steps then
         pos2=1
       end
       local row1,col1=self:pos_to_row_col(pos1)
@@ -452,8 +501,8 @@ function Granchild:get_visual()
 
   -- show tape recording
   for i=1,self.num_voices do
-    local row=8
-    local col=4*(i-1)+4
+    local row=7
+    local col=4*(i-1)+3
     if self.tape_voice==i then
       self.visual[row][col]=15
     else
@@ -476,10 +525,21 @@ end
 function Granchild:grid_redraw()
   self.g:all(0)
   local gd=self:get_visual()
+  local s=1
+  local e=self.grid_width
+  local adj=0
+  if self.grid64 then
+    e=8
+    if not self.grid64default then
+      s=9
+      e=16
+      adj=-8
+    end
+  end
   for row=1,8 do
-    for col=1,self.grid_width do
+    for col=s,e do
       if gd[row][col]~=0 then
-        self.g:led(col,row,gd[row][col])
+        self.g:led(col+adj,row,gd[row][col])
       end
     end
   end
@@ -490,10 +550,10 @@ end
 -- lfo stuff
 function Granchild:update_lfos()
   for i=1,self.num_voices do
-    if params:get(i.."play")==2 then
+    if params:get(i.."play"..params:get(i.."scene"))==2 then
       for j,m in ipairs(self.mod_vals[i]) do
-        if params:get(m.name.."lfo")==2 then
-          params:set(i..m.name,util.clamp(util.linlin(-1,1,m.range[1],m.range[2],self:calculate_lfo(m.period,m.offset)),m.minmax[1],m.minmax[2]))
+        if params:get(i..m.name.."lfo"..params:get(i.."scene"))==2 then
+          params:set(i..m.name..params:get(i.."scene"),util.clamp(util.linlin(-1,1,m.range[1],m.range[2],self:calculate_lfo(m.period,m.offset)),m.minmax[1],m.minmax[2]))
         end
       end
     end
@@ -564,13 +624,13 @@ function Granchild:rec_stop()
   if tape_name~=nil then
     softcut.buffer_write_stereo(tape_name,0.25,self:current_time()-self.tape_start)
   end
-  -- TODO load the tape into the current voice!
+  -- load the tape into the current voice
   print("saved to '"..tape_name.."'")
   local voice=self.tape_voice
   clock.run(function()
     clock.sleep(1)
     print("loading!")
-    params:set(voice.."sample",tape_name)
+    params:set(voice.."sample"..params:get(voice.."scene"),tape_name)
   end)
   self.tape_voice=0
 end
