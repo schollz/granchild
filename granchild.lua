@@ -212,7 +212,7 @@ end
 function init()
   setup_params()
 
-  granchild_grid=granchild:new({grid_on=true,toggleable=true})
+  granchild_grid=granchild:new({grid_on=true,toggleable=false})
   -- local kolor = include("kolor/lib/kolor")
   -- kolor_grid = kolor:new({grid_on=false,toggleable=true})
   -- kolor_grid:toggle_grid(false)

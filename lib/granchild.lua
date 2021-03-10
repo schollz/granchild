@@ -214,19 +214,19 @@ function Granchild:key_press(row,col,on)
   end
   if on then
     self.pressed_buttons[row..","..col]=self:current_time()
-    if row==8 and col==2 and self.toggleable then
-      self.kill_timer=self:current_time()
-    end
+    -- if row==8 and col==2 and self.toggleable then
+    --   self.kill_timer=self:current_time()
+    -- end
   else
     self.pressed_buttons[row..","..col]=nil
-    if row==8 and col==2 and self.toggleable then
-      self.kill_timer=self:current_time()-self.kill_timer
-      if self.kill_timer>1 then
-        print("switching!")
-        self:toggle_grid(false)
-      end
-      self.kill_timer=0
-    end
+    -- if row==8 and col==2 and self.toggleable then
+    --   self.kill_timer=self:current_time()-self.kill_timer
+    --   if self.kill_timer>1 then
+    --     print("switching!")
+    --     self:toggle_grid(false)
+    --   end
+    --   self.kill_timer=0
+    -- end
   end
 
   if (col%4==2 or col%4==3 or col%4==0) and row<7 and on then
