@@ -213,7 +213,7 @@ Engine_ZGlut : CroneEngine {
 			// 	rate: pitch, 
 			// 	);
 			sig = BLowPass4.ar(sig, cutoff, q);
-			sig = Compander.ar(sig,sig,0.25);
+			sig = Compander.ar(sig,sig,0.25)/8;
 			env = EnvGen.kr(Env.asr(1, 1, 1), gate: gate, timeScale: envscale);
 
 			level = env;

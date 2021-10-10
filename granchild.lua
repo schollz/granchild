@@ -1,4 +1,4 @@
--- granchild v2.0.1
+-- granchild v2.0.2
 -- granular sequencer
 --
 -- llllllll.co/t/granchild
@@ -104,7 +104,7 @@ local function setup_params()
       params:add_control(i.."cutoff"..scene,"filter cutoff",controlspec.new(20,20000,"exp",0,20000,"hz"))
       params:set_action(i.."cutoff"..scene,function(value) engine.cutoff(i,value) end)
 
-      params:add_control(i.."q"..scene,"filter q",controlspec.new(0.00,1.00,"lin",0.01,1))
+      params:add_control(i.."q"..scene,"filter rq",controlspec.new(0.1,1.00,"lin",0.01,1))
       params:set_action(i.."q"..scene,function(value) engine.q(i,value) end)
 
       params:add_control(i.."send"..scene,"delay send",controlspec.new(0.0,1.0,"lin",0.01,0.2))
