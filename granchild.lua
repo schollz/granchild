@@ -1,4 +1,4 @@
--- granchild v2.0.2
+-- granchild v2.0.3beta
 -- granular sequencer
 --
 -- llllllll.co/t/granchild
