@@ -112,7 +112,7 @@ Engine_ZGlut : CroneEngine {
 						interp: 2, 
 						pan: pan_sig,
 						rate:pitch,
-						maxGrains:128,
+						maxGrains:96,
 						mul:main_vol,
 					)+
 				  GrainBuf.ar(
@@ -124,7 +124,7 @@ Engine_ZGlut : CroneEngine {
 						interp: 2, 
 						pan: pan_sig2,
 						rate:pitch,
-						maxGrains:128,
+						maxGrains:96,
 						mul:main_vol,
 					)+
 				GrainBuf.ar(
@@ -136,7 +136,7 @@ Engine_ZGlut : CroneEngine {
 						interp: 2, 
 						pan: pan_sig,
 						rate:pitch/2,
-						maxGrains:96,
+						maxGrains:72,
 						mul:subharmonic_vol,
 					)+
 				  GrainBuf.ar(
@@ -148,7 +148,7 @@ Engine_ZGlut : CroneEngine {
 						interp: 2, 
 						pan: pan_sig2,
 						rate:pitch/2,
-						maxGrains:96,
+						maxGrains:72,
 						mul:subharmonic_vol,
 					)+
 				GrainBuf.ar(
@@ -160,7 +160,7 @@ Engine_ZGlut : CroneEngine {
 						interp: 2, 
 						pan: pan_sig,
 						rate:pitch*2,
-						maxGrains:64,
+						maxGrains:32,
 						mul:overtone_vol*0.7,
 					)+
 				  GrainBuf.ar(
@@ -172,7 +172,7 @@ Engine_ZGlut : CroneEngine {
 						interp: 2, 
 						pan: pan_sig2,
 						rate:pitch*2,
-						maxGrains:64,
+						maxGrains:32,
 						mul:overtone_vol*0.7,
 					)+
 				GrainBuf.ar(
@@ -184,7 +184,7 @@ Engine_ZGlut : CroneEngine {
 						interp: 2, 
 						pan: pan_sig,
 						rate:pitch*4,
-						maxGrains:48,
+						maxGrains:24,
 						mul:overtone_vol*0.3,
 					)+
 				  GrainBuf.ar(
@@ -196,7 +196,7 @@ Engine_ZGlut : CroneEngine {
 						interp: 2, 
 						pan: pan_sig2,
 						rate:pitch*4,
-						maxGrains:48,
+						maxGrains:24,
 						mul:overtone_vol*0.3,
 					)
 				  ;

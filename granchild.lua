@@ -125,9 +125,10 @@ local function setup_params()
       params:set_action(i.."pos"..scene,function(value) engine.seek(i,util.clamp(value+params:get(i.."seek"..scene),0,1)) end)
 
       params:add_control(i.."size"..scene,"size",controlspec.new(1,15,"lin",1,5,"",1/15))
-      params:set_action(i.."size"..scene,function(value) engine.size(i,value*clock.get_beat_sec()/10) end)
+      params:set_action(i.."size"..scene,function(value)
+        engine.size(i,util.clamp(value*clock.get_beat_sec()/10,0.001,util.linlin(1,40,1,0.1,params:get(i.."density"..scene))))
+      end)
       params:add_option(i.."sizelfo"..scene,"size lfo",{"off","on"},1)
-
 
       params:add_taper(i.."jitter"..scene,"jitter",0,500,0,5,"ms")
       params:set_action(i.."jitter"..scene,function(value) engine.jitter(i,value/1000) end)
@@ -154,8 +155,6 @@ local function setup_params()
       end)
     end
   end
-
-
 
   params:add_group("delay",17)
   params:add_option("delayscene","scene",{"a","b"},1)
@@ -208,7 +207,6 @@ local function setup_params()
   bang(1)
 end
 
-
 function init()
   setup_params()
 
@@ -223,7 +221,6 @@ function init()
   -- granchild_grid:set_toggle_callback(function()
   --   kolor_grid:toggle_grid()
   -- end)
-
 
   -- setup grid
   -- kolor_grid.lattice.hard_sync()
@@ -247,8 +244,6 @@ function init()
   -- params:set("1cutoff1",3000)
   -- params:set("1cutoff2",3000)
 end
-
-
 
 function enc(k,d)
   if k==2 then
@@ -274,11 +269,10 @@ function key(k,z)
       press_positions[k-1]={position[1],position[2]}
     end
     granchild_grid:key_press(press_positions[k-1][1],press_positions[k-1][2],z==1)
-  elseif k==1 and z==1 then 
-	  granchild_grid:toggle_grid64_side()
+  elseif k==1 and z==1 then
+    granchild_grid:toggle_grid64_side()
   end
 end
-
 
 function redraw()
   screen.clear()
