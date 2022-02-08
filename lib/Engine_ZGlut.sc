@@ -112,7 +112,7 @@ Engine_ZGlut : CroneEngine {
 						interp: 2, 
 						pan: pan_sig,
 						rate:pitch,
-						maxGrains:128,
+						maxGrains:64,
 						mul:main_vol,
 					)+
 				  GrainBuf.ar(
@@ -124,7 +124,7 @@ Engine_ZGlut : CroneEngine {
 						interp: 2, 
 						pan: pan_sig2,
 						rate:pitch,
-						maxGrains:128,
+						maxGrains:64,
 						mul:main_vol,
 					)+
 				GrainBuf.ar(
@@ -136,7 +136,7 @@ Engine_ZGlut : CroneEngine {
 						interp: 2, 
 						pan: pan_sig,
 						rate:pitch/2,
-						maxGrains:96,
+						maxGrains:48,
 						mul:subharmonic_vol,
 					)+
 				  GrainBuf.ar(
@@ -148,7 +148,7 @@ Engine_ZGlut : CroneEngine {
 						interp: 2, 
 						pan: pan_sig2,
 						rate:pitch/2,
-						maxGrains:96,
+						maxGrains:48,
 						mul:subharmonic_vol,
 					)+
 				GrainBuf.ar(
@@ -160,8 +160,8 @@ Engine_ZGlut : CroneEngine {
 						interp: 2, 
 						pan: pan_sig,
 						rate:pitch*2,
-						maxGrains:64,
-						mul:overtone_vol*0.7,
+						maxGrains:48,
+						mul:overtone_vol,
 					)+
 				  GrainBuf.ar(
 						numChannels: 2, 
@@ -172,34 +172,9 @@ Engine_ZGlut : CroneEngine {
 						interp: 2, 
 						pan: pan_sig2,
 						rate:pitch*2,
-						maxGrains:64,
-						mul:overtone_vol*0.7,
-					)+
-				GrainBuf.ar(
-						numChannels: 2, 
-						trigger:grain_trig, 
-						dur:size, 
-						sndbuf:buf, 
-						pos: pos_sig + jitter_sig4, 
-						interp: 2, 
-						pan: pan_sig,
-						rate:pitch*4,
 						maxGrains:48,
-						mul:overtone_vol*0.3,
-					)+
-				  GrainBuf.ar(
-						numChannels: 2, 
-						trigger:grain_trig, 
-						dur:size, 
-						sndbuf:buf2, 
-						pos: pos_sig + jitter_sig4, 
-						interp: 2, 
-						pan: pan_sig2,
-						rate:pitch*4,
-						maxGrains:48,
-						mul:overtone_vol*0.3,
-					)
-				  ;
+						mul:overtone_vol,
+					);
 						// maxGrains:[128,256,64,128,64]/2,
 						// mul:[0.125,0.625,0.05,0.15,0.05]/2,
 			// sig = GrainBuf.ar(

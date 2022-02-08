@@ -246,6 +246,7 @@ function init()
   -- params:set("1sample1","/home/we/dust/audio/kolor/bank12/loop_break_bpm175.wav")
   -- params:set("1cutoff1",3000)
   -- params:set("1cutoff2",3000)
+  --
 end
 
 
