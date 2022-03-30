@@ -1,4 +1,4 @@
--- granchild v2.0.3
+-- granchild v2.0.4
 -- granular sequencer
 --
 -- llllllll.co/t/granchild
@@ -193,6 +193,7 @@ local function setup_params()
     params:add_control("delay_volume"..scene,"*".."delay output volume",controlspec.new(0.0,1.0,"lin",0,1.0,""))
     params:set_action("delay_volume"..scene,function(value) engine.delay_volume(value) end)
   end
+  params:add_control("rec_fade","rec fade time",controlspec.new(0.0,1500,"lin",10,100,"ms",10/1500))
 
   -- hide scene 2 initially
   for i=1,4 do

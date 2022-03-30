@@ -574,7 +574,6 @@ function Granchild:rec_start(voice)
     self.rec_stop()
   end
   self.tape_voice=voice
-  self.tape_start=self:current_time()
   audio.level_eng_cut(0)
   audio.level_tape_cut(0)
   --softcut.reset()
@@ -592,17 +591,16 @@ function Granchild:rec_start(voice)
       softcut.level_input_cut(1,i,0)
       softcut.level_input_cut(2,i,1)
     end
-    softcut.level_slew_time(i,0.05)
-    softcut.rate_slew_time(i,0.05)
-    softcut.level(i,0)
-    softcut.rec(i,1)
-    softcut.play(i,1)
-    softcut.rate(i,1)
-    softcut.position(i,0)
-    softcut.loop_start(i,0)
-    softcut.loop_end(i,121)
-    softcut.rec_level(i,1.0)
+    softcut.rec_level(i,0.0)
     softcut.pre_level(i,1.0)
+    softcut.level_slew_time(i,0.05)
+    softcut.rate_slew_time(i,0)
+    softcut.recpre_slew_time(i,params:get("rec_fade")/1000/10)
+    softcut.level(i,0)
+    softcut.rate(i,1)
+    softcut.position(i,1)
+    softcut.loop_start(i,1)
+    softcut.loop_end(i,121)
     softcut.post_filter_dry(i,0.0)
     softcut.post_filter_lp(i,1.0)
     softcut.post_filter_rq(i,1.0)
@@ -613,26 +611,48 @@ function Granchild:rec_start(voice)
     softcut.pre_filter_rq(i,1.0)
     softcut.pre_filter_fc(i,18000)
   end
+  clock.run(function()
+    for i=1,2 do 
+      softcut.play(i,1)
+      softcut.rec(i,1)
+    end
+    print("rec_start()")
+    self.tape_start=self:current_time()
+    for j=1,10 do 
+      for i=1,2 do 
+        softcut.rec_level(i,j/10)
+      end
+      clock.sleep(params:get("rec_fade")/1000/10)
+    end
+  end)
 end
 
 function Granchild:rec_stop()
-  for i=1,2 do
-    softcut.rec(i,0)
-    softcut.play(i,0)
-  end
-  local tape_name=self:tape_get_name()
-  if tape_name~=nil then
-    softcut.buffer_write_stereo(tape_name,0.25,self:current_time()-self.tape_start)
-  end
-  -- load the tape into the current voice
-  print("saved to '"..tape_name.."'")
   local voice=self.tape_voice
+  local total_length=self:current_time()-self.tape_start+params:get("rec_fade")/1000+params:get("rec_fade")/1000/10*1
   clock.run(function()
+    for j=1,10 do 
+      for i=1,2 do 
+        softcut.rec_level(i,1-j/10)
+      end
+      clock.sleep(params:get("rec_fade")/1000/10)
+    end
+    clock.sleep(params:get("rec_fade")/1000/10*1)
+    self.tape_voice=0
+    local tape_name=self:tape_get_name()
+    if tape_name~=nil then
+      softcut.buffer_write_stereo(tape_name,1-0.0005,total_length+0.001)
+    end
+    -- load the tape into the current voice
+    print("saved to '"..tape_name.."'")
     clock.sleep(1)
+    for i=1,2 do
+      softcut.rec(i,0)
+      softcut.play(i,0)
+    end
     print("loading!")
     params:set(voice.."sample"..params:get(voice.."scene"),tape_name)
   end)
-  self.tape_voice=0
 end
 
 function Granchild:tape_get_name()
