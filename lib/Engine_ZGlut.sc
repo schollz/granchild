@@ -44,7 +44,7 @@ Engine_ZGlut : CroneEngine {
 
 		SynthDef(\synth, {
 			arg out, effectBus, phase_out, level_out, buf, buf2,
-			gate=0, pos=0, speed=1, jitter=0,
+			gate=0, pos=0, speed=1, jitter=0, voice_pan=0,	
 			size=0.1, density=20, pitch=1, spread=0, gain=1, envscale=1,
 			freeze=0, t_reset_pos=0, cutoff=20000, q, mode=0, send=0,
 			subharmonics=0,overtones=0;
@@ -214,6 +214,7 @@ Engine_ZGlut : CroneEngine {
 			// 	);
 			sig = BLowPass4.ar(sig, cutoff, q);
 			sig = Compander.ar(sig,sig,0.25)/8;
+			sig = Balance2.ar(sig[0],sig[1],voice_pan);
 			env = EnvGen.kr(Env.asr(1, 1, 1), gate: gate, timeScale: envscale);
 
 			level = env;
@@ -336,6 +337,11 @@ Engine_ZGlut : CroneEngine {
 		this.addCommand("density", "if", { arg msg;
 			var voice = msg[1] - 1;
 			voices[voice].set(\density, msg[2]);
+		});
+
+		this.addCommand("pan", "if", { arg msg;
+			var voice = msg[1] - 1;
+			voices[voice].set(\voice_pan, msg[2]);
 		});
 
 		this.addCommand("pitch", "if", { arg msg;
