@@ -78,10 +78,10 @@ Engine_ZGlut : CroneEngine {
 
 			pan_sig = TRand.kr(trig: grain_trig,
 				lo: -1,
-				hi: 2*spread-1);
+				hi: (2*spread)-1);
 
 			pan_sig2 = TRand.kr(trig: grain_trig,
-				lo: 1-2*spread,
+				lo: 1-(2*spread),
 				hi: 1);
 
 			jitter_sig = TRand.kr(trig: grain_trig,
