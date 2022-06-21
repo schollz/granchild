@@ -163,8 +163,11 @@ local function setup_params()
   params:add_option("delayscene","scene",{"a","b"},1)
   params:set_action("delayscene",function(scene)
     for _,param_name in ipairs(param_list_delay) do
-      params:hide(i..param_name..(3-scene))
-      params:show(i..param_name..scene)
+      params:hide(param_name..(3-scene))
+      params:show(param_name..scene)
+      if _menu.rebuild_params~=nil then
+        _menu.rebuild_params()
+      end
       local p=params:lookup_param(i..param_name..scene)
       p:bang()
     end
