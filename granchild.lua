@@ -78,7 +78,7 @@ local function setup_params()
       params:add_control(i.."seek"..scene,"seek",controlspec.new(0,1,"lin",0.001,0,"",0.001/1))
       params:set_action(i.."seek"..scene,function(value) engine.seek(i,util.clamp(value+params:get(i.."pos"..scene),0,1)) end)
 
-      params:add_control(i.."volume"..scene,"volume",controlspec.new(0,1.0,"lin",0.05,0.25,"vol",0.05/1))
+      params:add_control(i.."volume"..scene,"volume",controlspec.new(0,4.0,"lin",0.05,0.25,"vol",0.05/4))
       params:set_action(i.."volume"..scene,function(value)
         engine.volume(i,value)
         -- turn off the delay if volume is zero
