@@ -438,7 +438,7 @@ function Granchild:get_visual()
 
   -- show the volume
   for i=1,self.num_voices do
-    local val=util.linlin(0,1,0,15,params:get(i.."volume"..params:get(i.."scene")))
+    local val=util.linlin(0,4,0,15,params:get(i.."volume"..params:get(i.."scene")))
     local col=4*(i-1)+1
     self.visual[7][col]=util.round(val)
     self.visual[8][col]=15-util.round(val)
@@ -612,14 +612,14 @@ function Granchild:rec_start(voice)
     softcut.pre_filter_fc(i,18000)
   end
   clock.run(function()
-    for i=1,2 do 
+    for i=1,2 do
       softcut.play(i,1)
       softcut.rec(i,1)
     end
     print("rec_start()")
     self.tape_start=self:current_time()
-    for j=1,10 do 
-      for i=1,2 do 
+    for j=1,10 do
+      for i=1,2 do
         softcut.rec_level(i,j/10)
       end
       clock.sleep(params:get("rec_fade")/1000/10)
@@ -631,8 +631,8 @@ function Granchild:rec_stop()
   local voice=self.tape_voice
   local total_length=self:current_time()-self.tape_start+params:get("rec_fade")/1000+params:get("rec_fade")/1000/10*1
   clock.run(function()
-    for j=1,10 do 
-      for i=1,2 do 
+    for j=1,10 do
+      for i=1,2 do
         softcut.rec_level(i,1-j/10)
       end
       clock.sleep(params:get("rec_fade")/1000/10)
